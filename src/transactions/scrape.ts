@@ -7,6 +7,7 @@ import { frame } from '../utils/delays.ts'
 import { event } from '../utils/event-listeners.ts'
 import { loadScript } from '../utils/extension/load-script.ts'
 import { unwrap } from '../utils/unwrap.ts'
+import { RawTransaction } from './parse.ts'
 
 /**
  * Constants for various selectors used for scraping the transactions page.
@@ -101,13 +102,15 @@ class ElementGetter {
  * @param since The date of the latest transaction cached. If omitted, it'll get
  * all the transactions.
  */
-export async function * scrape (since?: Date) {
+export async function * scrape (
+  since?: Date
+): AsyncGenerator<RawTransaction, void> {
   // Create an iframe to the transaction page and wait for it to load
   const iframe = Object.assign(document.createElement('iframe'), {
     src: 'https://eacct-ucsd-sp.transactcampus.com/eAccounts/AccountTransaction.aspx'
   })
   Object.assign(iframe.style, {
-    // display: 'none'
+    display: 'none'
   })
   document.body.appendChild(iframe)
   await event(iframe, 'load')
@@ -154,7 +157,10 @@ export async function * scrape (since?: Date) {
         accountName,
         cardNumber,
         location,
-        transactionType,
+        transactionType:
+          transactionType === 'Debit' || transactionType === 'Credit'
+            ? transactionType
+            : unwrap(`'${transactionType}' is neither Debit nor Credit.`),
         amount
       }
       lastDate = dateTime

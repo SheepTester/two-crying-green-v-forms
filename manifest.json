@@ -5,7 +5,7 @@
   "manifest_version": 3,
   "content_scripts": [
     {
-      "matches": ["*://eacct-ucsd-sp.transactcampus.com/eAccounts/*"],
+      "matches": ["*://eacct-ucsd-sp.transactcampus.com/*"],
       "css": ["/dist/content-styles.css"],
       "js": ["/dist/content-script.js"]
     }
