@@ -5,12 +5,31 @@
 
 import chrome from './chrome.js'
 
-export function loadScript (path: string): Promise<void> {
+/**
+ * Load a web-accessible script by its local path in the extension.
+ *
+ * Note that in order for the script to be loadable in a web page, it must be
+ * listed in the `web_accessible_resources` array in the manifest.json.
+ *
+ * @param target The document to load the script in.
+ * @returns A dispatch function for sending a message to the script using the
+ * `twocryinggreenvforms` event.
+ */
+export function loadScript (
+  path: string,
+  target = document
+): Promise<(detail: unknown) => void> {
   return new Promise((resolve, reject) => {
-    const script = document.createElement('script')
-    script.addEventListener('load', () => resolve())
+    const script = target.createElement('script')
+    script.addEventListener('load', () => {
+      resolve(detail => {
+        target.dispatchEvent(
+          new CustomEvent('twocryinggreenvforms', { detail })
+        )
+      })
+    })
     script.addEventListener('error', reject)
     script.src = chrome.runtime.getURL(path)
-    document.head.append(script)
+    target.head.append(script)
   })
 }

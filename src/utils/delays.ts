@@ -9,3 +9,10 @@
 export function frame () {
   return new Promise(window.requestAnimationFrame)
 }
+
+/**
+ * @returns a promise that resolves after the given wait time in milliseconds.
+ */
+export function delay (waitTime: number) {
+  return new Promise(resolve => setTimeout(resolve, waitTime))
+}
