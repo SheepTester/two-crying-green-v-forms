@@ -8,14 +8,17 @@ import { scrape } from './transactions/scrape.ts'
 import { TransactionDb } from './transactions/store.ts'
 
 async function main () {
+  let count = 0
   const rawTransactions = []
   for await (const transaction of scrape()) {
     rawTransactions.push(transaction)
+    count++
+    if (count >= 15 * 15) break
   }
 
   const transactions = parse(rawTransactions)
   const db = await TransactionDb.create()
-  db.withTransaction(true, store => {
+  await db.withTransaction(true, store => {
     for (const transaction of transactions) {
       store.add(transaction)
     }
