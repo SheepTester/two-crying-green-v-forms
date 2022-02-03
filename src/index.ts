@@ -1,11 +1,11 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
-/// <reference lib="dom.asynciterable" />
 /// <reference lib="deno.ns" />
 
 import { frame } from './utils/delays.ts'
 import { event } from './utils/event-listeners.ts'
+import { evalJs } from './utils/extension/eval.ts'
 import { unwrap } from './utils/unwrap.ts'
 
 const selectors = {
@@ -21,7 +21,7 @@ async function scrape () {
     src: 'https://eacct-ucsd-sp.transactcampus.com/eAccounts/AccountTransaction.aspx'
   })
   Object.assign(iframe.style, {
-    display: 'none'
+    // display: 'none'
   })
   document.body.appendChild(iframe)
   await event(iframe, 'load')
@@ -63,9 +63,10 @@ async function scrape () {
   getElement('startDateInput', win.HTMLInputElement).value =
     '2000-01-01 12:00 AM'
   getElement('searchBtn', win.HTMLInputElement).click()
-  const table = await element('resultsTable')
+  await element('resultsTable')
+  const table = getElement('resultsTable', win.HTMLTableElement)
   const results = []
-  for (const row of table.querySelectorAll('tbody tr')) {
+  for (const row of table.tBodies[0].rows) {
     const [
       dateTime,
       accountName,
@@ -73,7 +74,7 @@ async function scrape () {
       location,
       transactionType,
       amount
-    ] = Array.from(row.children, td => td.textContent ?? '')
+    ] = Array.from(row.cells, td => td.textContent ?? '')
     results.push({
       dateTime,
       accountName,
@@ -84,14 +85,7 @@ async function scrape () {
     })
   }
   console.log(results)
-  // Cannot .click() due to a CSP for extensions
-  const doPostBackArg =
-    getElement('nextPage', win.HTMLAnchorElement).href.match(
-      /javascript:__doPostBack\('(.+)',''\)/
-    )?.[1] ?? unwrap('Could not get __doPostBack')
-  console.log(win)
-  win.__doPostBack(doPostBackArg, '')
+  evalJs(getElement('nextPage', win.HTMLAnchorElement).href)
 }
 
-console.log('hello', scrape)
 ;(window as any).scrape = scrape

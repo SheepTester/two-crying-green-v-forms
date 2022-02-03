@@ -6,8 +6,14 @@
   "content_scripts": [
     {
       "matches": ["*://eacct-ucsd-sp.transactcampus.com/eAccounts/*"],
-      "css": ["dist/content-styles.css"],
-      "js": ["dist/content-script.js"]
+      "css": ["/dist/content-styles.css"],
+      "js": ["/dist/content-script.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["/dist/isolation-escape.js"],
+      "matches": ["*://eacct-ucsd-sp.transactcampus.com/*"]
     }
   ],
   "icons": {
