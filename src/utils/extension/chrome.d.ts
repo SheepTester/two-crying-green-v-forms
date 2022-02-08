@@ -1,5 +1,10 @@
 // Adapted from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/chrome/index.d.ts
 
+/// <reference no-default-lib="true"/>
+/// <reference lib="dom" />
+/// <reference lib="dom.iterable" />
+/// <reference lib="deno.ns" />
+
 // Type definitions for Chrome extension development
 // Project: http://developer.chrome.com/extensions/
 // Definitions by: Matthew Kimber <https://github.com/matthewkimber>

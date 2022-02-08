@@ -57,11 +57,7 @@ class IframeWrapper {
     selector: keyof typeof selectors,
     ExpectedElement: ElementConstructor<Elem>
   ): Elem | TypeError {
-    if (
-      !(ExpectedElement.prototype instanceof this.win.Element) &&
-      // Hack to prevent TypeScript from thinking this is a type guard :/
-      (true as boolean)
-    ) {
+    if (!(ExpectedElement.prototype instanceof this.win.Element)) {
       throw new TypeError(
         "ExpectedElement is a foreigner from the extension's isolated world"
       )
