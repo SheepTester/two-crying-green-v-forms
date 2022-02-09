@@ -15,6 +15,8 @@ import { RawTransaction } from './parse.ts'
 const selectors = {
   /** Start date of the search (inclusive) */
   startDateInput: '#ctl00_MainContent_BeginRadDateTimePicker_dateInput',
+  /** End date of the search (exclusive) */
+  endDateInput: '#ctl00_MainContent_EndRadDateTimePicker_dateInput',
   /** "Search" button that starts the search for transactions */
   searchBtn: '#MainContent_ContinueButton',
   /** Loading thing for the first results (always in DOM, usually hidden) */
@@ -148,13 +150,22 @@ class IframeWrapper {
 }
 
 /**
- * Get all transactions approximately since the given date.
+ * Get all transactions approximately since the given date. Gives transactions
+ * in reverse chronological order.
+ *
+ * You shouldn't have to worry about `until`; it is used to recursively continue
+ * pagination if pagination dies after the 15 pages.
  *
  * @param since The date of the latest transaction cached. If omitted, it'll get
  * all the transactions.
+ * @param until The date before which to start the search. If after 15 pages,
+ * eAccounts dies, we can resume the search from the given date. This date is
+ * exclusive, so the first transaction will be the transaction right before the
+ * given date.
  */
 export async function * scrape (
-  since?: Date
+  since?: Date,
+  until?: string
 ): AsyncGenerator<RawTransaction, void> {
   // Create an iframe to the transaction page and wait for it to load
   const iframe = await IframeWrapper.load(
@@ -164,8 +175,13 @@ export async function * scrape (
   // Start the date range from 2000
   iframe.getElement('startDateInput', iframe.win.HTMLInputElement).value =
     '2000-01-01 12:00 AM'
+  if (until !== undefined) {
+    iframe.getElement('endDateInput', iframe.win.HTMLInputElement).value = until
+  }
   let first = true
   let lastDate = new Date().toString()
+  /** Tracks the date before the last date */
+  let penultimateDate = lastDate
   do {
     if (first) {
       // Search
@@ -193,7 +209,9 @@ export async function * scrape (
       iframe.win.HTMLTableElement
     )
     if (!table) {
-      console.error('sad')
+      // If it finished loading but the table hasn't updated, then eAccounts has
+      // given up. (It usually 404's after 15 pages.)
+      yield * scrape(since, penultimateDate)
       return
     }
     for (const row of table.tBodies[0].rows) {
@@ -216,10 +234,13 @@ export async function * scrape (
             : unwrap(`'${transactionType}' is neither Debit nor Credit.`),
         amount
       }
-      lastDate = dateTime
+      if (dateTime !== lastDate) {
+        // Shift the dates down
+        penultimateDate = lastDate
+        lastDate = dateTime
+      }
     }
     // Remove the ID from the table (so can detect when the table next comes up)
     table.id = ''
   } while (!since || new Date(lastDate) >= since)
-  // TODO: it dies after 15 pages. Need a way to detect and resuscitate
 }

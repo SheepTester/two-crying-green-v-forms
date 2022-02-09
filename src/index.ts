@@ -13,16 +13,16 @@ async function main () {
   for await (const transaction of scrape()) {
     rawTransactions.push(transaction)
     count++
-    if (count >= 15 * 15) break
+    // if (count >= 15 * 15) break
   }
 
-  const transactions = parse(rawTransactions)
-  const db = await TransactionDb.create()
-  await db.withTransaction(true, store => {
-    for (const transaction of transactions) {
-      store.add(transaction)
-    }
-  })
+  // const transactions = parse(rawTransactions)
+  // const db = await TransactionDb.create()
+  // await db.withTransaction(true, store => {
+  //   for (const transaction of transactions) {
+  //     store.add(transaction)
+  //   }
+  // })
 }
 
 Object.assign(window, { main })
