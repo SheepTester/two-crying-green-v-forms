@@ -136,6 +136,13 @@ class IframeWrapper {
     })
   }
 
+  setValue (selector: keyof typeof selectors, value: string) {
+    const input = this.getElement(selector, this.win.HTMLInputElement)
+    input.value = value
+    // input.dispatchEvent(new FocusEvent('focus'))
+    input.focus()
+  }
+
   static async load (url: string) {
     const iframe = Object.assign(document.createElement('iframe'), {
       src: url
@@ -173,10 +180,9 @@ export async function * scrape (
   )
 
   // Start the date range from 2000
-  iframe.getElement('startDateInput', iframe.win.HTMLInputElement).value =
-    '2000-01-01 12:00 AM'
+  iframe.setValue('startDateInput', '2000-01-01 12:00 AM')
   if (until !== undefined) {
-    iframe.getElement('endDateInput', iframe.win.HTMLInputElement).value = until
+    iframe.setValue('endDateInput', until)
   }
   let first = true
   let lastDate = new Date().toString()

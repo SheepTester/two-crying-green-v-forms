@@ -3,16 +3,20 @@
 /// <reference lib="dom.iterable" />
 /// <reference lib="deno.ns" />
 
-import { parse } from './transactions/parse.ts'
+import { parseStream } from './transactions/parse.ts'
 import { scrape } from './transactions/scrape.ts'
 import { TransactionDb } from './transactions/store.ts'
 
 async function main () {
-  let count = 0
-  const rawTransactions = []
-  for await (const transaction of scrape()) {
-    rawTransactions.push(transaction)
-    count++
+  console.log((await scrape(undefined, '2022-02-06 8:25 PM').next()).value)
+
+  return
+  const transactions = []
+  for await (const transaction of parseStream(
+    scrape(undefined, '2022-02-06 8:25 PM')
+  )) {
+    console.log(Object.values(transaction).join(' '))
+    transactions.push(transaction)
     // if (count >= 15 * 15) break
   }
 
