@@ -139,8 +139,9 @@ class IframeWrapper {
   setValue (selector: keyof typeof selectors, value: string) {
     const input = this.getElement(selector, this.win.HTMLInputElement)
     input.value = value
-    // input.dispatchEvent(new FocusEvent('focus'))
-    input.focus()
+    // Needed for it to acknowledge the change in value
+    input.dispatchEvent(new FocusEvent('focus'))
+    input.dispatchEvent(new FocusEvent('blur'))
   }
 
   static async load (url: string) {
