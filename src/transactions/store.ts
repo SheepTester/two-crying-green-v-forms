@@ -5,10 +5,23 @@ import { Transaction } from './parse.ts'
  *
  * @returns a promise that resolves with the request result.
  */
-function req<T> (request: IDBRequest<T>): Promise<T> {
+function req<T> (
+  request: IDBRequest<T>,
+  ignoreErrors: string[] = []
+): Promise<T> {
   return new Promise((resolve, reject) => {
     request.addEventListener('success', () => resolve(request.result))
-    request.addEventListener('error', () => reject(request.error))
+    request.addEventListener('error', event => {
+      if (
+        request.error instanceof DOMException &&
+        ignoreErrors.includes(request.error.name)
+      ) {
+        event.preventDefault()
+        resolve(request.result)
+      } else {
+        reject(request.error)
+      }
+    })
   })
 }
 
@@ -53,7 +66,15 @@ export class TransactionDb {
       const { transaction, store } = this.#transaction(write)
       transact(store, req)
       transaction.addEventListener('complete', () => resolve())
-      transaction.addEventListener('error', () => reject(transaction.error))
+      transaction.addEventListener('error', event => {
+        if (!event.defaultPrevented) {
+          reject(
+            event.target instanceof IDBRequest
+              ? event.target.error
+              : transaction.error || event
+          )
+        }
+      })
     })
   }
 
