@@ -53,7 +53,7 @@ export class TransactionDb {
       const { transaction, store } = this.#transaction(write)
       transact(store, req)
       transaction.addEventListener('complete', () => resolve())
-      transaction.addEventListener('error', reject)
+      transaction.addEventListener('error', () => reject(transaction.error))
     })
   }
 

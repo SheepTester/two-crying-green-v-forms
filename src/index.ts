@@ -6,27 +6,21 @@
 import { parseStream } from './transactions/parse.ts'
 import { scrape } from './transactions/scrape.ts'
 import { TransactionDb } from './transactions/store.ts'
+import { syncChunks } from './utils/async-iter.ts'
+import { ignoreError } from './utils/unwrap.ts'
 
 async function main () {
-  console.log((await scrape(undefined, '2022-02-06 8:25 PM').next()).value)
-
-  return
-  const transactions = []
-  for await (const transaction of parseStream(
-    scrape(undefined, '2022-02-06 8:25 PM')
-  )) {
-    console.log(Object.values(transaction).join(' '))
-    transactions.push(transaction)
-    // if (count >= 15 * 15) break
+  const db = await TransactionDb.create()
+  for await (const transactions of syncChunks(parseStream(scrape()))) {
+    await db.withTransaction(true, (store, request) => {
+      for (const transaction of transactions) {
+        console.log(Object.values(transaction).join(' '))
+        request(store.add(transaction)).catch(
+          ignoreError(DOMException, 'ConstraintError')
+        )
+      }
+    })
   }
-
-  // const transactions = parse(rawTransactions)
-  // const db = await TransactionDb.create()
-  // await db.withTransaction(true, store => {
-  //   for (const transaction of transactions) {
-  //     store.add(transaction)
-  //   }
-  // })
 }
 
 Object.assign(window, { main })

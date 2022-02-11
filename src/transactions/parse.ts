@@ -156,6 +156,9 @@ export function parse (raw: RawTransaction[]): Transaction[] {
   return transactions
 }
 
+/**
+ * @param iterable Presumably, the generator from `scrape`
+ */
 export async function * parseStream (
   iterable: AsyncIterable<RawTransaction>
 ): AsyncGenerator<Transaction, void, undefined> {

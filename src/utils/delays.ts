@@ -16,3 +16,10 @@ export function frame () {
 export function delay (waitTime: number) {
   return new Promise(resolve => setTimeout(resolve, waitTime))
 }
+
+/**
+ * @returns a promise that resolves as soon as possible. (setTimeout of 0 ms)
+ */
+export function moment () {
+  return delay(0)
+}
