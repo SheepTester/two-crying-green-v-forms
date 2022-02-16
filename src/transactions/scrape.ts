@@ -3,7 +3,7 @@
 /// <reference lib="dom.iterable" />
 /// <reference lib="deno.ns" />
 
-import { frame } from '../utils/delays.ts'
+import { moment } from '../utils/delays.ts'
 import { event } from '../utils/event-listeners.ts'
 import { loadScript } from '../utils/extension/load-script.ts'
 import { unwrap } from '../utils/unwrap.ts'
@@ -107,27 +107,58 @@ class IframeWrapper {
   /**
    * Resolves when the element of the right type is found.
    */
-  async element<Elem extends HTMLElement> (
+  element<Elem extends HTMLElement> (
     selector: keyof typeof selectors,
-    ExpectedElement: ElementConstructor<Elem>
+    ExpectedElement: ElementConstructor<Elem>,
+    target?: Node
   ): Promise<Elem> {
-    let element = this.#getElement(selector, ExpectedElement)
-    while (element instanceof TypeError) {
-      await frame()
-      element = this.#getElement(selector, ExpectedElement)
+    const element = this.#getElement(selector, ExpectedElement)
+    if (element instanceof this.win.HTMLElement) {
+      return Promise.resolve(element)
     }
-    return element
+    return new Promise(resolve => {
+      const observer = new MutationObserver(() => {
+        const element = this.#getElement(selector, ExpectedElement)
+        if (element instanceof this.win.HTMLElement) {
+          resolve(element)
+          observer.disconnect()
+        }
+      })
+      observer.observe(target ?? this.win.document.body, {
+        // Include descendants
+        subtree: true,
+        // Track removed/added children
+        childList: true
+      })
+    })
   }
 
   /**
    * Resolves when the element is no longer present.
    */
-  async elementRemoved (selector: keyof typeof selectors): Promise<void> {
-    let element = this.#getElement(selector, this.win.HTMLElement)
-    while (element instanceof this.win.HTMLElement) {
-      await frame()
-      element = this.#getElement(selector, this.win.HTMLElement)
+  elementRemoved (
+    selector: keyof typeof selectors,
+    target?: Node
+  ): Promise<void> {
+    const element = this.#getElement(selector, this.win.HTMLElement)
+    if (element instanceof Error) {
+      return Promise.resolve()
     }
+    return new Promise(resolve => {
+      const observer = new MutationObserver(() => {
+        const element = this.#getElement(selector, this.win.HTMLElement)
+        if (element instanceof Error) {
+          resolve()
+          observer.disconnect()
+        }
+      })
+      observer.observe(target ?? this.win.document.body, {
+        // Include descendants
+        subtree: true,
+        // Track removed/added children
+        childList: true
+      })
+    })
   }
 
   clickJsLink (element: HTMLAnchorElement) {
@@ -144,12 +175,16 @@ class IframeWrapper {
     input.dispatchEvent(new FocusEvent('blur'))
   }
 
+  remove () {
+    this.win.frameElement?.remove()
+  }
+
   static async load (url: string) {
     const iframe = Object.assign(document.createElement('iframe'), {
       src: url
     })
     Object.assign(iframe.style, {
-      // display: 'none'
+      display: 'none'
     })
     document.body.appendChild(iframe)
     await event(iframe, 'load')
@@ -200,13 +235,19 @@ export async function * scrape (
         iframe.win.HTMLDivElement
       )
       while (loading.style.display !== 'none') {
-        await frame()
+        await moment()
       }
     } else {
       // Click on the next page
-      iframe.clickJsLink(
-        iframe.getElement('nextPage', iframe.win.HTMLAnchorElement)
+      const nextPageLink = iframe.getElementMaybe(
+        'nextPage',
+        iframe.win.HTMLAnchorElement
       )
+      if (!nextPageLink) {
+        // If there is no next page, then we've reached the end!
+        break
+      }
+      iframe.clickJsLink(nextPageLink)
       // Wait for results
       await iframe.element('pageLoading', iframe.win.HTMLDivElement)
       await iframe.elementRemoved('pageLoading')
@@ -219,7 +260,7 @@ export async function * scrape (
       // If it finished loading but the table hasn't updated, then eAccounts has
       // given up. (It usually 404's after 15 pages.)
       yield * scrape(since, penultimateDate)
-      return
+      break
     }
     for (const row of table.tBodies[0].rows) {
       const [
@@ -250,4 +291,5 @@ export async function * scrape (
     // Remove the ID from the table (so can detect when the table next comes up)
     table.id = ''
   } while (!since || new Date(lastDate) >= since)
+  iframe.remove()
 }
