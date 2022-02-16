@@ -14,10 +14,20 @@ async function main () {
     await db.withTransaction(true, (store, request) => {
       for (const transaction of transactions) {
         console.log(Object.values(transaction).join(' '))
-        request(store.add(transaction), ['ConstraintError'])
+        // Overwrite if already existing (put() instead of add())
+        request(store.put(transaction))
       }
     })
   }
 }
 
-Object.assign(window, { main })
+async function main2 () {
+  const db = await TransactionDb.create()
+  const transactions = []
+  for await (const transaction of db.cursor()) {
+    transactions.push(transaction)
+  }
+  console.log(transactions)
+}
+
+Object.assign(window, { main, main2 })

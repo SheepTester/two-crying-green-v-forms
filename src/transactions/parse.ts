@@ -130,7 +130,8 @@ function parseTransaction ({
   return {
     time: time * MS_PER_MIN,
     account: accountName,
-    amount: parseFloat(amount),
+    // Remove thousands separator (otherwise "3,749.00 USD" gets parsed as 3)
+    amount: parseFloat(amount.replaceAll(',', '')),
     location
   }
 }
