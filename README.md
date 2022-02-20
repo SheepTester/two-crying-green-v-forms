@@ -14,7 +14,7 @@ probably need [Node](https://nodejs.org/en/)).
 
 ```sh
 # Build once
-$ ./scripts/build.sh
+$ make
 
 # Watch for changes and rebuild (still need to reload extension manually)
 $ ./scripts/watch.sh
