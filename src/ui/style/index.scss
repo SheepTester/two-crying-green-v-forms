@@ -1,0 +1,10 @@
+@use "./app.scss" as app;
+@use "./navbar.scss" as navbar;
+
+.navbar {
+  @include navbar.navbar;
+}
+
+.app {
+  @include app.app;
+}

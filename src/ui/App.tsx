@@ -7,5 +7,9 @@ import {} from 'https://esm.sh/preact@10.6.6'
 import { useEffect, useState } from 'https://esm.sh/preact@10.6.6/hooks'
 
 export function App () {
-  return <h1>Success.</h1>
+  return (
+    <div class='app'>
+      <h1>Success.</h1>
+    </div>
+  )
 }
