@@ -1,0 +1,22 @@
+$navbar-background: #ffcd00;
+$navbar-foreground: black;
+
+.navbar {
+  display: flex;
+  background-color: $navbar-background;
+  padding: 10px 15px;
+}
+.navbar-link {
+  color: $navbar-foreground;
+  text-decoration: none;
+  padding: 10px 15px;
+  margin: 0 5px;
+  &:not(.current):hover {
+    text-decoration: underline;
+  }
+}
+.current {
+  background-color: $navbar-foreground;
+  color: $navbar-background;
+  border-radius: 50px;
+}

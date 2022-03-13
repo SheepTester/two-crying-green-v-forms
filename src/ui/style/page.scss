@@ -1,0 +1,11 @@
+// Styles for the UI page. Complements the content style
+
+@use './components/app.scss';
+@use './components/navbar.scss';
+@use './base.scss' as base;
+
+body {
+  @include base.base;
+
+  margin: 0;
+}

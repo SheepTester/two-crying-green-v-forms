@@ -1,0 +1,9 @@
+// Styles injected into all eAccounts pages
+
+@use './components/app.scss';
+@use './base.scss' as base;
+
+.app {
+  // Contain all of the style resets to within the app
+  @include base.base;
+}

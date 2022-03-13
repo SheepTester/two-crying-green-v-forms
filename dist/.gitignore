@@ -1,4 +1,6 @@
 content-script.js
+content-style.css
+content-style.css.map
 background.js
-ui.css
-ui.css.map
+page.css
+page.css.map
