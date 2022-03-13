@@ -2,7 +2,10 @@
 // eAccounts styles
 
 .app {
-  h1 {
-    font-weight: normal;
+  margin: 20px;
+
+  .graph {
+    width: 100%;
+    height: 60vh;
   }
 }
