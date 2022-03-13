@@ -19,3 +19,5 @@ $ make
 # Watch for changes and rebuild (still need to reload extension manually)
 $ ./scripts/watch.sh
 ```
+
+To reload the extension in Chrome, go to chrome://extensions/

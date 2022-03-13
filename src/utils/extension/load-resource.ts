@@ -33,3 +33,15 @@ export function loadScript (
     target.head.append(script)
   })
 }
+
+export function loadStyle (path: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const style = document.createElement('link')
+    style.addEventListener('load', () => resolve())
+    style.addEventListener('error', reject)
+    style.rel = 'stylesheet'
+    style.type = 'text/css'
+    style.href = chrome.runtime.getURL(path)
+    document.head.append(style)
+  })
+}

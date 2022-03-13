@@ -6,6 +6,7 @@
 import { parseStream } from './transactions/parse.ts'
 import { scrape } from './transactions/scrape.ts'
 import { TransactionDb } from './transactions/store.ts'
+import { initErrorPage, initNormalPage } from './ui/index.tsx'
 import { syncChunks } from './utils/async-iter.ts'
 
 async function main () {
@@ -28,6 +29,12 @@ async function main2 () {
     transactions.push(transaction)
   }
   console.log(transactions)
+}
+
+if (window.location.pathname.endsWith('/TwoCryingGreenVForms.aspx')) {
+  initErrorPage()
+} else {
+  initNormalPage()
 }
 
 Object.assign(window, { main, main2 })

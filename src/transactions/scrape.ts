@@ -5,7 +5,7 @@
 
 import { moment } from '../utils/delays.ts'
 import { event } from '../utils/event-listeners.ts'
-import { loadScript } from '../utils/extension/load-script.ts'
+import { loadScript } from '../utils/extension/load-resource.ts'
 import { unwrap } from '../utils/unwrap.ts'
 import { RawTransaction } from './parse.ts'
 
@@ -48,7 +48,7 @@ class IframeWrapper {
     }
     this.win = win
 
-    this.#escaper = loadScript('./dist/isolation-escape.js', win.document)
+    this.#escaper = loadScript('/dist/isolation-escape.js', win.document)
   }
 
   /**
