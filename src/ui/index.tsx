@@ -6,6 +6,7 @@
 import { render } from 'https://esm.sh/preact@10.6.6'
 import { App } from './App.tsx'
 import { Page } from './Page.tsx'
+import { PATH, PATTERN, TITLE } from './vars.ts'
 
 /** Initialize the graph page on the "Error!" page. */
 export async function initErrorPage () {
@@ -15,13 +16,14 @@ export async function initErrorPage () {
   for (const sheet of document.styleSheets) {
     sheet.ownerNode?.remove()
   }
+  document.title = TITLE
 
   const root = document.createElement('div')
   document.body.append(root)
   render(<Page />, root)
 
   window.addEventListener('popstate', () => {
-    if (!window.location.pathname.endsWith('/TwoCryingGreenVForms.aspx')) {
+    if (!PATTERN.test(window.location.pathname)) {
       window.location.reload()
     }
   })
@@ -35,34 +37,39 @@ export async function initNormalPage () {
   }
   const root = document.createElement('div')
 
+  let originalTitle = document.title
+
   let initAppIfNeeded: () => void
   new Promise<void>(resolve => {
-    initAppIfNeeded = resolve
+    initAppIfNeeded = () => {
+      resolve()
+      main.style.display = 'none'
+      root.style.display = ''
+      document.title = TITLE
+    }
   }).then(() => {
     main.after(root)
     render(<App />, root)
-    main.style.display = 'none'
   })
 
   const navbarLink = document.createElement('a')
-  navbarLink.href = '/eAccounts/TwoCryingGreenVForms.aspx'
-  navbarLink.textContent = 'I will type this later'
+  navbarLink.href = PATH
+  navbarLink.textContent = TITLE
   document.querySelector('.SiteMenu2 .SiteMenuRow')?.append(navbarLink)
 
   navbarLink.addEventListener('click', event => {
-    window.history.pushState({}, '', '/eAccounts/TwoCryingGreenVForms.aspx')
+    window.history.pushState({}, '', PATH)
     event.preventDefault()
     initAppIfNeeded()
   })
 
   window.addEventListener('popstate', () => {
-    if (window.location.pathname.endsWith('/TwoCryingGreenVForms.aspx')) {
+    if (PATTERN.test(window.location.pathname)) {
       initAppIfNeeded()
-      main.style.display = 'none'
-      root.style.display = ''
     } else {
       main.style.display = ''
       root.style.display = 'none'
+      document.title = originalTitle
     }
   })
 }
