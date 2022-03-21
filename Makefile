@@ -1,6 +1,10 @@
-background_src := $(wildcard src/background/*.ts src/background/**/*.ts)
-cs_src := $(filter-out $(background_src), $(wildcard src/*.ts src/*.tsx src/**/*.ts src/**/*.tsx))
-css_src := $(wildcard src/ui/style/*.scss src/ui/style/**/*.scss)
+# Recursive wildcard for nested directories (**/* only goes down one level)
+# https://stackoverflow.com/a/12959764
+rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+
+background_src := $(call rwildcard,src/background/,*.ts)
+cs_src := $(filter-out $(background_src), $(call rwildcard,src/,*.ts) $(call rwildcard,src/,*.tsx))
+css_src := $(call rwildcard,src/ui/style/,*.scss)
 
 all: dist/content-script.js dist/background.js dist/content-style.css dist/page.css
 
