@@ -4,19 +4,24 @@
 /// <reference lib="deno.ns" />
 
 import { useState } from 'https://esm.sh/preact@10.6.6/hooks'
-import { Transaction } from '../transactions/parse.ts'
+import { AccumulatedTransaction } from '../transactions/parse.ts'
 import { TransactionDb } from '../transactions/store.ts'
 import { useAsyncEffect } from '../utils/use-async-effect.ts'
 import { Graph } from './components/Graph.tsx'
 
 export function App () {
-  const [data, setData] = useState<Transaction[] | null>(null)
+  const [data, setData] = useState<AccumulatedTransaction[] | null>(null)
 
   useAsyncEffect(async () => {
+    const account = 'Dining Dollars'
     const db = await TransactionDb.create()
     const transactions = []
+    let accumulated = 0
     for await (const transaction of db.cursor()) {
-      transactions.push(transaction)
+      if (transaction.account === account) {
+        accumulated += transaction.amount
+        transactions.push({ ...transaction, balance: accumulated })
+      }
     }
     setData(transactions)
   }, [])

@@ -85,6 +85,13 @@ export type Transaction = {
   location: string
 }
 
+export type AccumulatedTransaction = Transaction & {
+  /**
+   * The resulting amount of money in the account after the transaction.
+   */
+  balance: number
+}
+
 /**
  * Number of milliseconds in a minute.
  */

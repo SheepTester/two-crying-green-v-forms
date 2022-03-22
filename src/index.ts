@@ -6,7 +6,7 @@
 import { parseStream } from './transactions/parse.ts'
 import { scrape } from './transactions/scrape.ts'
 import { TransactionDb } from './transactions/store.ts'
-import { initErrorPage, initNormalPage } from './ui/index.tsx'
+import { handleErrorPage, handleNormalPage } from './ui/index.tsx'
 import { PATTERN } from './ui/vars.ts'
 import { syncChunks } from './utils/async-iter.ts'
 
@@ -33,9 +33,9 @@ async function main2 () {
 }
 
 if (PATTERN.test(window.location.pathname)) {
-  initErrorPage()
+  handleErrorPage()
 } else {
-  initNormalPage()
+  handleNormalPage()
 }
 
 Object.assign(window, { main, main2 })

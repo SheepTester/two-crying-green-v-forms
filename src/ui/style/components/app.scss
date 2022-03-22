@@ -4,8 +4,25 @@
 .app {
   margin: 20px;
 
-  .graph {
+  .graph-wrapper {
     width: 100%;
     height: 60vh;
+    position: relative;
+  }
+  .graph {
+    position: absolute;
+    top: 0;
+    left: 0;
+    fill: none;
+  }
+  .axis-line {
+    stroke: rgba($color: white, $alpha: 0.3);
+  }
+  .gradient-stop {
+    stop-color: orange;
+  }
+  .data-line {
+    stroke: orange;
+    stroke-width: 2px;
   }
 }

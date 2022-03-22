@@ -9,7 +9,7 @@ import { Page } from './Page.tsx'
 import { PATH, PATTERN, TITLE } from './vars.ts'
 
 /** Initialize the graph page on the "Error!" page. */
-export async function initErrorPage () {
+export async function handleErrorPage () {
   document.querySelector('#errorBox')?.remove()
 
   // Remove styles
@@ -17,6 +17,11 @@ export async function initErrorPage () {
     sheet.ownerNode?.remove()
   }
   document.title = TITLE
+
+  const viewportMeta = document.createElement('meta')
+  viewportMeta.name = 'viewport'
+  viewportMeta.content = 'width=device-width, initial-scale=1'
+  document.head.append(viewportMeta)
 
   const root = document.createElement('div')
   document.body.append(root)
@@ -30,7 +35,7 @@ export async function initErrorPage () {
 }
 
 /** Initialize the graph page on an existing eAccounts page. */
-export async function initNormalPage () {
+export async function handleNormalPage () {
   const main = document.getElementById('mainContainer')
   if (!main) {
     throw new Error("Couldn't find main container")
