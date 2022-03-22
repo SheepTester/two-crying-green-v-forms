@@ -8,7 +8,7 @@ import { scrape } from './transactions/scrape.ts'
 import { TransactionDb } from './transactions/store.ts'
 import { handleErrorPage, handleNormalPage } from './ui/index.tsx'
 import { PATTERN } from './ui/vars.ts'
-import { syncChunks } from './utils/async-iter.ts'
+import { syncChunks } from './utils/iterables.ts'
 
 async function main () {
   const db = await TransactionDb.create()
