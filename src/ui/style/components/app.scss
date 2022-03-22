@@ -25,4 +25,18 @@
     stroke: orange;
     stroke-width: 2px;
   }
+  .axis-label {
+    fill: rgba($color: white, $alpha: 0.7);
+    text-anchor: middle;
+    alignment-baseline: hanging;
+  }
+  .tick-mark {
+    fill: rgba($color: white, $alpha: 0.3);
+    text-anchor: end;
+    alignment-baseline: middle;
+    font-size: 12px;
+  }
+  .tick-major {
+    fill: rgba($color: white, $alpha: 0.5);
+  }
 }
