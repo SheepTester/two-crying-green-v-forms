@@ -13,12 +13,14 @@ export function App () {
   const [data, setData] = useState<AccumulatedTransaction[] | null>(null)
 
   useAsyncEffect(async () => {
-    const account = 'Dining Dollars'
     const db = await TransactionDb.create()
     const transactions = []
     let accumulated = 0
     for await (const transaction of db.cursor()) {
-      if (transaction.account === account) {
+      if (
+        transaction.account === 'Dining Dollars' ||
+        transaction.account === 'Triton2Go Dining Dollars'
+      ) {
         accumulated += transaction.amount
         transactions.push({ ...transaction, balance: accumulated })
       }

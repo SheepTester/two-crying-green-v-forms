@@ -5,22 +5,25 @@
 
 import { useEffect, useRef, useState } from 'https://esm.sh/preact@10.6.6/hooks'
 import { AccumulatedTransaction } from '../../transactions/parse.ts'
+import { pairs } from '../../utils/iterables.ts'
 
-/** Padding around the entire graph (so strokes aren't clipped), in px */
+/** Padding around the entire graph (so strokes aren't clipped) (px) */
 const PADDING = 10
-/** Space below the x-axis, in px */
+/** Space below the x-axis (px) */
 const X_AXIS_PADDING = 40
-/** Space left of the y-axis, in px */
+/** Space left of the y-axis (px) */
 const Y_AXIS_PADDING = 70
-/** Minimum space for a x-axis label step, in px */
+/** Minimum space for a x-axis label step (px) */
 const MIN_X_STEP = 100
-/** Minimum space for a y-axis label step, in px */
+/** Minimum space for a y-axis label step (px) */
 const MIN_Y_STEP = 20
-/** Length of an axis tick mark */
+/** Length of an axis tick mark (px) */
 const MINOR_TICK = 5
-/** Length of an axis major tick mark */
+/** Length of an axis major tick mark (px) */
 const MAJOR_TICK = 10
-/** Space between the y-axis (not the tick marks) and axis step labels */
+/** Space between the x-axis (not the tick marks) and axis step labels (px) */
+const X_STEP_LABEL_PADDING = 10
+/** Space between the y-axis (not the tick marks) and axis step labels (px) */
 const Y_STEP_LABEL_PADDING = 15
 
 const padding = {
@@ -31,6 +34,24 @@ const padding = {
   horizontal: PADDING * 2 + Y_AXIS_PADDING,
   vertical: PADDING * 2 + X_AXIS_PADDING
 }
+
+/** Milliseconds per minute (ms) */
+const MINUTE = 60 * 1000
+/** Milliseconds per day (ms) */
+const DAY = 24 * 60 * MINUTE
+
+/** Possible steps for the time axis (ms) */
+const timeSteps = [
+  MINUTE,
+  5 * MINUTE,
+  10 * MINUTE,
+  60 * MINUTE,
+  DAY,
+  7 * DAY,
+  2 * 7 * DAY,
+  3 * 7 * DAY,
+  28 * DAY
+]
 
 /**
  * Get a nice, round step value for axis labels.
@@ -84,15 +105,14 @@ function ActualGraph ({
     (data[data.length - 1].time - data[0].time)
   const yScale = (viewport.height - padding.vertical) / (maxAmount - minAmount)
 
-  const xStep = getStep(
+  const minXStep =
     (MIN_X_STEP / (viewport.width - padding.horizontal)) *
-      (data[data.length - 1].time - data[0].time)
-  )
+    (data[data.length - 1].time - data[0].time)
+  const xStep = timeSteps.find(step => step >= minXStep) ?? 365 * DAY
   const yStep = getStep(
     (MIN_Y_STEP / (viewport.height - padding.vertical)) *
       (maxAmount - minAmount)
   )
-  console.log(xStep, yStep)
 
   // Of the form 'H x V y ...'
   const path = `M ${padding.left} ${
@@ -125,11 +145,11 @@ function ActualGraph ({
         d={`M ${padding.left} ${padding.top} V ${
           viewport.height - padding.bottom
         } H ${viewport.width - padding.right} ${Array.from(
-          steps(data[0].time, data[data.length - 1].time, xStep.minor, true),
+          steps(data[0].time, data[data.length - 1].time, xStep, true),
           time =>
             `M ${padding.left + (time - data[0].time) * xScale} ${
               viewport.height - padding.bottom
-            } v ${time % xStep.major === 0 ? MAJOR_TICK : MINOR_TICK}`
+            } v ${MINOR_TICK}`
         ).join('')} ${Array.from(
           steps(minAmount, maxAmount, yStep.minor, true),
           amount =>
@@ -153,13 +173,52 @@ function ActualGraph ({
       </text>
       {Array.from(steps(minAmount, maxAmount, yStep.minor, true), amount => (
         <text
-          class={`tick-mark ${amount % yStep.major === 0 ? 'tick-major' : ''}`}
+          key={amount}
+          class={`tick-mark y-tick ${
+            amount % yStep.major === 0 ? 'tick-major' : ''
+          }`}
           x={padding.left - Y_STEP_LABEL_PADDING}
           y={padding.top + (maxAmount - amount) * yScale}
         >
           {yStep.minor < 1 ? amount.toFixed(2) : amount}
         </text>
       ))}
+      {xStep < DAY
+        ? Array.from(
+            steps(data[0].time, data[data.length - 1].time, xStep, true),
+            time => (
+              <text
+                key={time}
+                class='tick-mark x-tick'
+                x={padding.left + (time - data[0].time) * xScale}
+                y={viewport.height - padding.bottom + X_STEP_LABEL_PADDING}
+              >
+                {new Date(time).toLocaleTimeString(undefined, {
+                  hour: 'numeric',
+                  minute: 'numeric'
+                })}
+              </text>
+            )
+          )
+        : Array.from(
+            pairs(steps(data[0].time, data[data.length - 1].time, xStep, true)),
+            ([time, timeRight]) => (
+              <text
+                key={time}
+                class='tick-mark x-tick'
+                x={
+                  padding.left +
+                  ((time + timeRight) / 2 - data[0].time) * xScale
+                }
+                y={viewport.height - padding.bottom + X_STEP_LABEL_PADDING}
+              >
+                {new Date(time).toLocaleDateString(undefined, {
+                  month: 'short',
+                  year: 'numeric'
+                })}
+              </text>
+            )
+          )}
     </svg>
   )
 }

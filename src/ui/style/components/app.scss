@@ -2,7 +2,7 @@
 // eAccounts styles
 
 .app {
-  margin: 20px;
+  padding: 20px;
 
   .graph-wrapper {
     width: 100%;
@@ -32,9 +32,15 @@
   }
   .tick-mark {
     fill: rgba($color: white, $alpha: 0.3);
+    font-size: 12px;
+  }
+  .x-tick {
+    text-anchor: middle;
+    alignment-baseline: hanging;
+  }
+  .y-tick {
     text-anchor: end;
     alignment-baseline: middle;
-    font-size: 12px;
   }
   .tick-major {
     fill: rgba($color: white, $alpha: 0.5);
