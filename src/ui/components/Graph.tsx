@@ -3,88 +3,17 @@
 /// <reference lib="dom" />
 /// <reference lib="deno.ns" />
 
-import { useEffect, useRef, useState } from 'https://esm.sh/preact@10.6.6/hooks'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'https://esm.sh/preact@10.6.6/hooks'
+import * as d3 from 'https://cdn.skypack.dev/d3@7.6.1?dts'
 import { AccumulatedTransaction } from '../../transactions/parse.ts'
-import { pairs } from '../../utils/iterables.ts'
+import { extrema } from '../../utils/extrema.ts'
 
-/** Padding around the entire graph (so strokes aren't clipped) (px) */
-const PADDING = 10
-/** Space below the x-axis (px) */
-const X_AXIS_PADDING = 40
-/** Space left of the y-axis (px) */
-const Y_AXIS_PADDING = 70
-/** Minimum space for a x-axis label step (px) */
-const MIN_X_STEP = 100
-/** Minimum space for a y-axis label step (px) */
-const MIN_Y_STEP = 20
-/** Length of an axis tick mark (px) */
-const MINOR_TICK = 5
-/** Length of an axis major tick mark (px) */
-const MAJOR_TICK = 10
-/** Space between the x-axis (not the tick marks) and axis step labels (px) */
-const X_STEP_LABEL_PADDING = 10
-/** Space between the y-axis (not the tick marks) and axis step labels (px) */
-const Y_STEP_LABEL_PADDING = 15
-
-const padding = {
-  top: PADDING,
-  left: PADDING + Y_AXIS_PADDING,
-  right: PADDING,
-  bottom: PADDING + X_AXIS_PADDING,
-  horizontal: PADDING * 2 + Y_AXIS_PADDING,
-  vertical: PADDING * 2 + X_AXIS_PADDING
-}
-
-/** Milliseconds per minute (ms) */
-const MINUTE = 60 * 1000
-/** Milliseconds per day (ms) */
-const DAY = 24 * 60 * MINUTE
-
-/** Possible steps for the time axis (ms) */
-const timeSteps = [
-  MINUTE,
-  5 * MINUTE,
-  10 * MINUTE,
-  60 * MINUTE,
-  DAY,
-  7 * DAY,
-  2 * 7 * DAY,
-  3 * 7 * DAY,
-  28 * DAY
-]
-
-/**
- * Get a nice, round step value for axis labels.
- *
- * @param minStep - The minimum step value (inclusive).
- * @returns the minor and major steps. Use the minor step, and emphasize the major step.
- */
-function getStep (minStep: number): { minor: number; major: number } {
-  // Round down to the nearest power of ten
-  const prevPower = 10 ** Math.floor(Math.log10(minStep))
-  // Find the smallest round step >= the minStep
-  const minorStep =
-    [1, 2, 2.5, 5].find(factor => factor * prevPower >= minStep) ?? 10
-  const minor = minorStep * prevPower
-  return {
-    minor,
-    major: (minorStep < 10 ? prevPower : minorStep) * 10
-  }
-}
-
-/**
- * @param end - The value to end before (inclusive).
- * @param fromZero - Whether to increase `start` so that it's a multiple of
- * `step` (i.e. the steps could have started from zero)
- * @yields steps from start to end by step.
- */
-function * steps (start: number, end: number, step: number, fromZero = false) {
-  let curr = fromZero ? Math.ceil(start / step) * step : start
-  while (curr <= end) {
-    yield curr
-    curr += step
-  }
-}
+const margin = { top: 20, right: 30, bottom: 30, left: 40 }
 
 type ActualGraphProps = {
   data: AccumulatedTransaction[]
@@ -93,132 +22,47 @@ type ActualGraphProps = {
 }
 function ActualGraph ({
   data,
-  viewport,
+  viewport: { width, height },
   includeZero = false
 }: ActualGraphProps) {
-  const maxAmount = data.reduce((acc, curr) => Math.max(acc, curr.balance), 0)
-  const minAmount = includeZero
-    ? 0
-    : data.reduce((acc, curr) => Math.min(acc, curr.balance), maxAmount)
-  const xScale =
-    (viewport.width - padding.horizontal) /
-    (data[data.length - 1].time - data[0].time)
-  const yScale = (viewport.height - padding.vertical) / (maxAmount - minAmount)
+  const ref = useRef<SVGSVGElement>(null)
 
-  const minXStep =
-    (MIN_X_STEP / (viewport.width - padding.horizontal)) *
-    (data[data.length - 1].time - data[0].time)
-  const xStep = timeSteps.find(step => step >= minXStep) ?? 365 * DAY
-  const yStep = getStep(
-    (MIN_Y_STEP / (viewport.height - padding.vertical)) *
-      (maxAmount - minAmount)
-  )
-
-  // Of the form 'H x V y ...'
-  const path = `M ${padding.left} ${
-    yScale * (maxAmount - data[0].balance) + padding.top
-  } ${data
-    .map(
-      ({ time, balance }) =>
-        `H ${(time - data[0].time) * xScale + padding.left} V ${
-          yScale * (maxAmount - balance) + padding.top
-        }`
-    )
-    .join('')} H ${viewport.width - padding.right}`
+  const { line, area } = useMemo(() => {
+    // https://observablehq.com/@d3/d3-scaletime
+    const xScale = d3
+      .scaleTime()
+      .domain([data[0].time, data[data.length - 1].time])
+      .range([margin.left, width - margin.right])
+      .nice()
+    const yScale = d3
+      .scaleLinear()
+      .domain(extrema(data.map(d => d.balance)))
+      .range([margin.top, height - margin.bottom])
+    const line = d3
+      .line<AccumulatedTransaction>()
+      .x(d => xScale(d.time))
+      .y(d => yScale(d.balance))
+      // https://github.com/d3/d3-shape/blob/main/README.md#curveStepAfter
+      .curve(d3.curveStepAfter)
+    const area = d3
+      .area<AccumulatedTransaction>()
+      .x(d => xScale(d.time))
+      .y0(height - margin.bottom)
+      .y1(d => yScale(d.balance))
+      .curve(d3.curveStepAfter)
+    return { line, area }
+  }, [data])
 
   return (
-    <svg class='graph' viewBox={`0 0 ${viewport.width} ${viewport.height}`}>
+    <svg class='graph' viewBox={`0 0 ${width} ${height}`} ref={ref}>
       <defs>
         <linearGradient id='gradient' x1='0' y1='0' x2='0' y2='1'>
           <stop class='gradient-stop' stop-opacity={0.3} offset='0%' />
           <stop class='gradient-stop' stop-opacity={0.05} offset='100%' />
         </linearGradient>
       </defs>
-
-      <path
-        class='data-gradient'
-        d={`${path} V ${viewport.height - padding.bottom} H ${padding.left} z`}
-        fill='url(#gradient)'
-      />
-      <path
-        class='axis-line'
-        d={`M ${padding.left} ${padding.top} V ${
-          viewport.height - padding.bottom
-        } H ${viewport.width - padding.right} ${Array.from(
-          steps(data[0].time, data[data.length - 1].time, xStep, true),
-          time =>
-            `M ${padding.left + (time - data[0].time) * xScale} ${
-              viewport.height - padding.bottom
-            } v ${MINOR_TICK}`
-        ).join('')} ${Array.from(
-          steps(minAmount, maxAmount, yStep.minor, true),
-          amount =>
-            `M ${padding.left} ${
-              padding.top + (maxAmount - amount) * yScale
-            } h ${amount % yStep.major === 0 ? -MAJOR_TICK : -MINOR_TICK}`
-        ).join('')}`}
-      />
-      <path class='data-line' d={path} />
-      <text
-        class='axis-label'
-        x={0}
-        y={0}
-        style={{
-          transform: `translate(${PADDING}px, ${
-            padding.top + (viewport.height - padding.vertical) / 2
-          }px) rotate(-90deg)`
-        }}
-      >
-        Dining dollars ($)
-      </text>
-      {Array.from(steps(minAmount, maxAmount, yStep.minor, true), amount => (
-        <text
-          key={amount}
-          class={`tick-mark y-tick ${
-            amount % yStep.major === 0 ? 'tick-major' : ''
-          }`}
-          x={padding.left - Y_STEP_LABEL_PADDING}
-          y={padding.top + (maxAmount - amount) * yScale}
-        >
-          {yStep.minor < 1 ? amount.toFixed(2) : amount}
-        </text>
-      ))}
-      {xStep < DAY
-        ? Array.from(
-            steps(data[0].time, data[data.length - 1].time, xStep, true),
-            time => (
-              <text
-                key={time}
-                class='tick-mark x-tick'
-                x={padding.left + (time - data[0].time) * xScale}
-                y={viewport.height - padding.bottom + X_STEP_LABEL_PADDING}
-              >
-                {new Date(time).toLocaleTimeString(undefined, {
-                  hour: 'numeric',
-                  minute: 'numeric'
-                })}
-              </text>
-            )
-          )
-        : Array.from(
-            pairs(steps(data[0].time, data[data.length - 1].time, xStep, true)),
-            ([time, timeRight]) => (
-              <text
-                key={time}
-                class='tick-mark x-tick'
-                x={
-                  padding.left +
-                  ((time + timeRight) / 2 - data[0].time) * xScale
-                }
-                y={viewport.height - padding.bottom + X_STEP_LABEL_PADDING}
-              >
-                {new Date(time).toLocaleDateString(undefined, {
-                  month: 'short',
-                  year: 'numeric'
-                })}
-              </text>
-            )
-          )}
+      <path class='data-gradient' d={area(data) ?? undefined} />
+      <path class='data-line' d={line(data) ?? undefined} />
     </svg>
   )
 }
