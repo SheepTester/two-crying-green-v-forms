@@ -25,19 +25,22 @@ function ActualGraph ({
   viewport: { width, height },
   includeZero = false
 }: ActualGraphProps) {
-  const ref = useRef<SVGSVGElement>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const xAxisRef = useRef<SVGGElement>(null)
+  const yAxisRef = useRef<SVGGElement>(null)
 
-  const { line, area } = useMemo(() => {
+  const { xScale, yScale, line, area } = useMemo(() => {
     // https://observablehq.com/@d3/d3-scaletime
     const xScale = d3
       .scaleTime()
       .domain([data[0].time, data[data.length - 1].time])
       .range([margin.left, width - margin.right])
-      .nice()
+    // .nice()
+    const [min, max] = extrema(data.map(d => d.balance))
     const yScale = d3
       .scaleLinear()
-      .domain(extrema(data.map(d => d.balance)))
-      .range([margin.top, height - margin.bottom])
+      .domain([includeZero ? 0 : min, max])
+      .range([height - margin.bottom, margin.top])
     const line = d3
       .line<AccumulatedTransaction>()
       .x(d => xScale(d.time))
@@ -50,11 +53,25 @@ function ActualGraph ({
       .y0(height - margin.bottom)
       .y1(d => yScale(d.balance))
       .curve(d3.curveStepAfter)
-    return { line, area }
-  }, [data])
+    return { xScale, yScale, line, area }
+  }, [data, width, height, includeZero])
+
+  useEffect(() => {
+    if (xAxisRef.current) {
+      d3.select(xAxisRef.current).call(
+        d3.axisBottom(xScale).ticks(1 + Math.floor(width / 100))
+      )
+    }
+  }, [xScale, xAxisRef.current, width])
+
+  useEffect(() => {
+    if (yAxisRef.current) {
+      d3.select(yAxisRef.current).call(d3.axisLeft(yScale))
+    }
+  }, [yScale, yAxisRef.current])
 
   return (
-    <svg class='graph' viewBox={`0 0 ${width} ${height}`} ref={ref}>
+    <svg class='graph' viewBox={`0 0 ${width} ${height}`} ref={svgRef}>
       <defs>
         <linearGradient id='gradient' x1='0' y1='0' x2='0' y2='1'>
           <stop class='gradient-stop' stop-opacity={0.3} offset='0%' />
@@ -63,6 +80,16 @@ function ActualGraph ({
       </defs>
       <path class='data-gradient' d={area(data) ?? undefined} />
       <path class='data-line' d={line(data) ?? undefined} />
+      <g
+        class='axis'
+        transform={`translate(0, ${height - margin.bottom})`}
+        ref={xAxisRef}
+      />
+      <g
+        class='axis'
+        transform={`translate(${margin.left}, 0)`}
+        ref={yAxisRef}
+      />
     </svg>
   )
 }

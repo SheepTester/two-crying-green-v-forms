@@ -28,24 +28,7 @@
   .data-gradient {
     fill: url(#gradient);
   }
-  .axis-label {
-    fill: rgba($color: white, $alpha: 0.7);
-    text-anchor: middle;
-    alignment-baseline: hanging;
-  }
-  .tick-mark {
-    fill: rgba($color: white, $alpha: 0.3);
-    font-size: 12px;
-  }
-  .x-tick {
-    text-anchor: middle;
-    alignment-baseline: hanging;
-  }
-  .y-tick {
-    text-anchor: end;
-    alignment-baseline: middle;
-  }
-  .tick-major {
-    fill: rgba($color: white, $alpha: 0.5);
+  .axis {
+    color: rgba($color: white, $alpha: 0.7);
   }
 }
