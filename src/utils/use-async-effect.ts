@@ -1,4 +1,4 @@
-import { useEffect } from 'https://esm.sh/preact@10.6.6/hooks'
+import { useEffect } from 'preact/hooks'
 
 /**
  * `useEffect` but the callback cannot return a cleanup function. This allows

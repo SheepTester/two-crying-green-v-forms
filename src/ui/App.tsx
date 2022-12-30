@@ -1,9 +1,9 @@
-/** @jsxImportSource https://esm.sh/preact@10.6.6 */
+/** @jsxImportSource preact */
 /// <reference no-default-lib="true"/>
 /// <reference lib="dom" />
 /// <reference lib="deno.ns" />
 
-import { useState } from 'https://esm.sh/preact@10.6.6/hooks'
+import { useState } from 'preact/hooks'
 import { AccumulatedTransaction } from '../transactions/parse.ts'
 import { TransactionDb } from '../transactions/store.ts'
 import { useAsyncEffect } from '../utils/use-async-effect.ts'

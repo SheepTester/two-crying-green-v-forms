@@ -1,15 +1,10 @@
-/** @jsxImportSource https://esm.sh/preact@10.6.6 */
+/** @jsxImportSource preact */
 /// <reference no-default-lib="true"/>
 /// <reference lib="dom" />
 /// <reference lib="deno.ns" />
 
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'https://esm.sh/preact@10.6.6/hooks'
-import * as d3 from 'https://cdn.skypack.dev/d3@7.6.1?dts'
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
+import * as d3 from 'd3'
 import { AccumulatedTransaction } from '../../transactions/parse.ts'
 import { extrema } from '../../utils/extrema.ts'
 

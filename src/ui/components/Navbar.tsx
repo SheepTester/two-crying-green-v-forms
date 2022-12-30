@@ -1,4 +1,4 @@
-/** @jsxImportSource https://esm.sh/preact@10.6.6 */
+/** @jsxImportSource preact */
 /// <reference no-default-lib="true"/>
 
 import { PATH, TITLE } from '../vars.ts'

@@ -1,9 +1,9 @@
-/** @jsxImportSource https://esm.sh/preact@10.6.6 */
+/** @jsxImportSource preact */
 /// <reference no-default-lib="true"/>
 /// <reference lib="dom" />
 /// <reference lib="deno.ns" />
 
-import { render } from 'https://esm.sh/preact@10.6.6'
+import { render } from 'preact'
 import { App } from './App.tsx'
 import { Page } from './Page.tsx'
 import { PATH, PATTERN, TITLE } from './vars.ts'
@@ -38,7 +38,7 @@ export async function handleErrorPage () {
 export async function handleNormalPage () {
   const main = document.getElementById('mainContainer')
   if (!main) {
-    throw new Error("Couldn't find main container")
+    throw new Error(`Couldn't find main container. ${window.location.href}`)
   }
   const root = document.createElement('div')
 
