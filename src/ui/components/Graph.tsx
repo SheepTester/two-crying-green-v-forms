@@ -8,11 +8,11 @@ import * as d3 from 'd3'
 import { CumTransaction } from '../../transactions/parse.ts'
 import { extrema } from '../../utils/extrema.ts'
 
-const margin = { top: 20, right: 30, bottom: 30, left: 40 }
+const margin = { top: 20, right: 20, bottom: 30, left: 40 }
 // https://observablehq.com/@d3/learn-d3-interaction
 const bisect = d3.bisector<CumTransaction, number>(d => d.time).center
 
-function displayUsd (amount: number, change = false): string {
+export function displayUsd (amount: number, change = false): string {
   return (amount < 0 ? '−$' : change ? '+$' : '$') + Math.abs(amount).toFixed(2)
 }
 
@@ -56,12 +56,14 @@ function Tooltip ({ datum, xScale, yScale, width, height }: TooltipProps) {
 
 type ActualGraphProps = {
   data: CumTransaction[]
+  account: string
   viewport: DOMRect
   includeZero?: boolean
   includeNow?: boolean
 }
 function ActualGraph ({
   data,
+  account,
   viewport: { width, height },
   includeZero = false,
   includeNow = false
@@ -118,7 +120,11 @@ function ActualGraph ({
   return (
     <>
       <svg
-        class='graph'
+        class={`graph ${
+          account === 'dining-dollars' || account === 'triton-cash'
+            ? account
+            : ''
+        }`}
         viewBox={`0 0 ${width} ${height}`}
         ref={svgRef}
         onMouseMove={e => {
@@ -169,8 +175,9 @@ function ActualGraph ({
 
 type GraphProps = {
   data: CumTransaction[]
+  account: string
 }
-export function Graph ({ data }: GraphProps) {
+export function Graph ({ data, account }: GraphProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [viewport, setViewPort] = useState<DOMRect | null>(null)
 
@@ -191,7 +198,14 @@ export function Graph ({ data }: GraphProps) {
 
   return (
     <div class='graph-wrapper' ref={wrapperRef}>
-      {viewport && <ActualGraph data={data} viewport={viewport} includeZero />}
+      {viewport && (
+        <ActualGraph
+          data={data}
+          account={account}
+          viewport={viewport}
+          includeZero
+        />
+      )}
     </div>
   )
 }

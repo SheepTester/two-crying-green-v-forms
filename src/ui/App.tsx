@@ -14,11 +14,12 @@ import { TransactionDb } from '../transactions/store.ts'
 import { accumulate } from '../utils/cum.ts'
 import { syncChunks } from '../utils/iterables.ts'
 import { useAsyncEffect } from '../utils/use-async-effect.ts'
-import { Graph } from './components/Graph.tsx'
+import { displayUsd, Graph } from './components/Graph.tsx'
 
 export function App () {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [refreshing, setRefreshing] = useState(false)
+  const [account, setAccount] = useState('dining-dollars')
 
   useAsyncEffect(async () => {
     const db = await TransactionDb.create()
@@ -31,15 +32,62 @@ export function App () {
 
   const cumTransactions = accumulate(
     transactions,
-    transaction =>
-      transaction.account === 'Dining Dollars' ||
-      transaction.account === 'Dining Dollars Rollover' ||
-      transaction.account === 'Triton2Go Dining Dollars'
+    account === 'dining-dollars'
+      ? transaction =>
+          transaction.account === 'Dining Dollars' ||
+          transaction.account === 'Dining Dollars Rollover' ||
+          transaction.account === 'Triton2Go Dining Dollars'
+      : account === 'triton-cash'
+      ? transaction => transaction.account === 'Triton Cash'
+      : transaction => transaction.account === account
   )
 
   return (
     <div class='app'>
-      {cumTransactions.length > 0 && <Graph data={cumTransactions} />}
+      <div class='above-graph'>
+        <div class='wrapper'>
+          <div class='label'>Account</div>
+          <select
+            class={`account ${
+              account === 'dining-dollars' || account === 'triton-cash'
+                ? account
+                : ''
+            }`}
+            value={account}
+            onChange={e => {
+              setAccount(e.currentTarget.value)
+            }}
+          >
+            <option class='dining-dollars' value='dining-dollars'>
+              Dining Dollars
+            </option>
+            <option class='triton-cash' value='triton-cash'>
+              Triton Cash
+            </option>
+            <optgroup label='Individual accounts'>
+              {Array.from(
+                new Set(transactions.map(t => t.account)),
+                account => (
+                  <option key={account} value={account}>
+                    {account}
+                  </option>
+                )
+              )}
+            </optgroup>
+          </select>
+        </div>
+        <div class='balance-wrapper'>
+          <div class='label'>Balance</div>
+          <div class='balance'>
+            {displayUsd(
+              cumTransactions[cumTransactions.length - 1]?.balance ?? 0
+            )}
+          </div>
+        </div>
+      </div>
+      {cumTransactions.length > 0 && (
+        <Graph data={cumTransactions} account={account} />
+      )}
       <button
         onClick={async () => {
           setRefreshing(true)
