@@ -1,4 +1,4 @@
-<img src="./images/icon.svg" style="float: right; width: 32px;">
+<img src="./images/icon.svg" width="64" align="right" />
 
 # Two Crying Green V Forms
 
