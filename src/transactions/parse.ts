@@ -11,7 +11,7 @@ export type RawTransaction = {
   accountName: string
 
   /**
-   * The student PID, except the A is replaced with 00000000000009.
+   * The student PID, except the A is replaced with 00000000000009 (not used).
    */
   cardNumber: string
 
@@ -144,47 +144,36 @@ function parseTransaction ({
 }
 
 /**
- * Converts raw transactions to transactions.
+ * Converts a stream of raw transactions from `scrape` into transactions.
  *
  * The reason why this can't convert one transaction at a time is because it
- * needs to be able to figure out unique IDs for simultaneous transactions.
- */
-export function parse (raw: RawTransaction[]): Transaction[] {
-  const transactions = raw.map(parseTransaction)
-  for (const [i, transaction] of transactions.entries()) {
-    // If the date/time matches, then increment time by 1
-    if (
-      i > 0 &&
-      Math.abs(transactions[i - 1].time / MS_PER_MIN) ===
-        Math.abs(transaction.time / MS_PER_MIN)
-    ) {
-      transactions[i].time = transactions[i - 1].time + 1
-    }
-  }
-  return transactions
-}
-
-/**
- * @param iterable Presumably, the generator from `scrape`
+ * needs to be able to create unique IDs for simultaneous transactions.
  */
 export async function * parseStream (
-  iterable: AsyncIterable<RawTransaction>
+  iterable: AsyncIterable<RawTransaction | null>
 ): AsyncGenerator<Transaction, void, undefined> {
-  let batch: Transaction[] = []
-  let currentDate = ''
+  // Buffer of transactions with the same time
+  let sameTime: Transaction[] = []
+  let lastDate = ''
   for await (const transaction of iterable) {
-    if (transaction.dateTime !== currentDate) {
-      for (const [i, parsed] of batch.entries()) {
-        parsed.time += batch.length - i - 1
+    if (transaction === null) {
+      // Pagination restarted, so all transactions in `sameTime` should be
+      // discarded.
+      sameTime = []
+      continue
+    }
+    if (transaction.dateTime !== lastDate) {
+      for (const [i, parsed] of sameTime.entries()) {
+        parsed.time += sameTime.length - i - 1
         yield parsed
       }
-      batch = []
-      currentDate = transaction.dateTime
+      sameTime = []
+      lastDate = transaction.dateTime
     }
-    batch.push(parseTransaction(transaction))
+    sameTime.push(parseTransaction(transaction))
   }
-  for (const [i, parsed] of batch.entries()) {
-    parsed.time += batch.length - i - 1
+  for (const [i, parsed] of sameTime.entries()) {
+    parsed.time += sameTime.length - i - 1
     yield parsed
   }
 }

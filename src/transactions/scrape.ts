@@ -193,36 +193,50 @@ class IframeWrapper {
 }
 
 /**
- * Get all transactions approximately since the given date. Gives transactions
- * in reverse chronological order.
+ * Get all transactions since `startDate`. Yields transactions in reverse
+ * chronological order, newest first.
  *
- * You shouldn't have to worry about `until`; it is used to recursively continue
- * pagination if pagination dies after the 15 pages.
+ * Don't pass anything into `endDate`. It is used by the function to recursively
+ * continue pagination.
  *
- * @param since The date of the latest transaction cached. If omitted, it'll get
- * all the transactions.
- * @param until The date before which to start the search. If after 15 pages,
- * eAccounts dies, we can resume the search from the given date. This date is
- * exclusive, so the first transaction will be the transaction right before the
- * given date.
+ * Yields `null` when pagination dies, indicating that all transactions with the
+ * same time as the last yielded transaction should be discarded. This is
+ * handled by `parseStream`.
+ *
+ * @param startDate The date of the last transaction cached (inclusive).
+ * Defaults to year 2000 to get the entire transaction history.
+ * @param endDate The date before which to start the search (exclusive) since
+ * transactions are yielded newest first. The first transaction yielded will be
+ * the last transaction before the given date, and the search will continue
+ * backwards from there.
  */
 export async function * scrape (
-  since?: Date,
-  until?: string
-): AsyncGenerator<RawTransaction, void> {
+  startDate?: Date,
+  endDate?: string
+): AsyncGenerator<RawTransaction | null, void> {
   // Create an iframe to the transaction page and wait for it to load
   const iframe = await IframeWrapper.load(
     'https://eacct-ucsd-sp.transactcampus.com/eAccounts/AccountTransaction.aspx'
   )
 
   // Start the date range from 2000
+  // TODO: startDate
   iframe.setValue('startDateInput', '2000-01-01 12:00 AM')
-  if (until !== undefined) {
-    iframe.setValue('endDateInput', until)
+  if (endDate !== undefined) {
+    iframe.setValue('endDateInput', endDate)
   }
   let first = true
   let lastDate = new Date().toString()
-  /** Tracks the date before the last date */
+  /**
+   * Tracks the date before the last date. Used to restart pagination when it
+   * dies.
+   *
+   * Why the penultimate date? If there were two 6 AM transactions but
+   * pagination died listing only one 6 AM transaction on the last page, then I
+   * would want to re-fetch the 6 AM transactions to check if there are more 6
+   * AM transactions. This is because the first 6 AM transaction would have an
+   * ID of 6 AM + 1 ms.
+   */
   let penultimateDate = lastDate
   do {
     if (first) {
@@ -257,9 +271,12 @@ export async function * scrape (
       iframe.win.HTMLTableElement
     )
     if (!table) {
+      // Indicate that previously yielded transactions on `lastDate` should be
+      // discarded.
+      yield null
       // If it finished loading but the table hasn't updated, then eAccounts has
       // given up. (It usually 404's after 15 pages.)
-      yield * scrape(since, penultimateDate)
+      yield * scrape(startDate, penultimateDate)
       break
     }
     for (const row of table.tBodies[0].rows) {
@@ -290,6 +307,6 @@ export async function * scrape (
     }
     // Remove the ID from the table (so can detect when the table next comes up)
     table.id = ''
-  } while (!since || new Date(lastDate) >= since)
+  } while (!startDate || new Date(lastDate) >= startDate)
   iframe.remove()
 }

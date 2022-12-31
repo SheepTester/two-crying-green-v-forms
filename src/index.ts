@@ -15,7 +15,7 @@ async function main () {
   for await (const transactions of syncChunks(parseStream(scrape()))) {
     await db.withTransaction(true, (store, request) => {
       for (const transaction of transactions) {
-        console.log(Object.values(transaction).join(' '))
+        // console.log(Object.values(transaction).join(' '))
         // Overwrite if already existing (put() instead of add())
         request(store.put(transaction))
       }
@@ -34,7 +34,9 @@ async function main2 () {
 
 if (PATTERN.test(window.location.pathname)) {
   handleErrorPage()
-} else {
+} else if (!document.getElementById('theform')) {
+  // #theform is the form used to redirect you to the sign-in page if you got
+  // signed out
   handleNormalPage()
 }
 

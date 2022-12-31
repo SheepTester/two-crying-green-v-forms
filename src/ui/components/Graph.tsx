@@ -74,7 +74,6 @@ function ActualGraph ({
         </linearGradient>
       </defs>
       <path class='data-gradient' d={area(data) ?? undefined} />
-      <path class='data-line' d={line(data) ?? undefined} />
       <g
         class='axis'
         transform={`translate(0, ${height - margin.bottom})`}
@@ -85,6 +84,7 @@ function ActualGraph ({
         transform={`translate(${margin.left}, 0)`}
         ref={yAxisRef}
       />
+      <path class='data-line' d={line(data) ?? undefined} />
     </svg>
   )
 }
