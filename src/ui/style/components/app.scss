@@ -1,3 +1,5 @@
+@use "../colors" as colors;
+
 // All app-related styles are namespaced under .app to prevent collisions with
 // eAccounts styles
 .app {
@@ -5,7 +7,6 @@
 
   .above-graph {
     display: flex;
-    justify-content: space-between;
   }
   .label {
     color: rgba($color: white, $alpha: 0.7);
@@ -25,14 +26,53 @@
     border-left: 5px solid var(--theme);
     padding: 10px 15px;
     border-radius: 5px;
-    background-color: #2e2f31;
+    background-color: colors.$interactive;
     box-shadow: 0 2px 5px rgba($color: black, $alpha: 0.2);
     width: 250px;
     margin-top: 5px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='48' width='48' fill='rgba(255, 255, 255, 0.9)'%3E%3Cpath d='m24 30-10-9.95h20Z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' width='24' fill='rgba(255, 255, 255, 0.9)'%3E%3Cpath d='m12 15-5-5h10Z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 5px center;
-    background-size: 24px;
+  }
+  .refresh-btn {
+    margin-left: auto;
+    margin-right: 20px;
+    border-radius: 50px;
+    padding-right: 15px;
+    display: flex;
+    align-items: center;
+    height: 36px;
+    background-color: colors.$interactive;
+    box-shadow: 0 2px 5px rgba($color: black, $alpha: 0.2);
+    transition: opacity 0.2s;
+
+    &::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 24px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' width='24' fill='rgba(255, 255, 255, 0.9)'%3E%3Cpath d='M12 20q-3.35 0-5.675-2.325Q4 15.35 4 12q0-3.35 2.325-5.675Q8.65 4 12 4q1.725 0 3.3.713 1.575.712 2.7 2.037V4h2v7h-7V9h4.2q-.8-1.4-2.187-2.2Q13.625 6 12 6 9.5 6 7.75 7.75T6 12q0 2.5 1.75 4.25T12 18q1.925 0 3.475-1.1T17.65 14h2.1q-.7 2.65-2.85 4.325Q14.75 20 12 20Z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      margin-left: 10px;
+      margin-right: 5px;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+
+      &::before {
+        animation: spin 0.5s infinite linear;
+
+        @keyframes spin {
+          0% {
+            transform: rotate(0);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      }
+    }
   }
 
   .graph-wrapper {

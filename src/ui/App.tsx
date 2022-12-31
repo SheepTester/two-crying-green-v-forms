@@ -59,7 +59,7 @@ export function App () {
             }}
           >
             <option class='dining-dollars' value='dining-dollars'>
-              Dining Dollars
+              Dining Dollars (total)
             </option>
             <option class='triton-cash' value='triton-cash'>
               Triton Cash
@@ -76,6 +76,48 @@ export function App () {
             </optgroup>
           </select>
         </div>
+        <button
+          class='refresh-btn'
+          onClick={async () => {
+            setRefreshing(true)
+            const lastDate =
+              transactions.length > 0
+                ? new Date(transactions[transactions.length - 1].time)
+                : undefined
+            const db = await TransactionDb.create()
+            const newTransactions: Transaction[] = []
+            for await (const transactions of syncChunks(
+              parseStream(scrape(lastDate))
+            )) {
+              await db.withTransaction(true, (store, request) => {
+                for (const transaction of transactions) {
+                  newTransactions.push(transaction)
+                  // Overwrite if already existing (put() instead of add())
+                  request(store.put(transaction))
+                }
+              })
+            }
+            // `transactions` should be chronological, but `scrape` yields reverse
+            // chronological
+            newTransactions.reverse()
+            // Remove duplicate IDs
+            if (lastDate) {
+              while (
+                newTransactions.length > 0 &&
+                newTransactions[0].time <= lastDate.getTime()
+              ) {
+                newTransactions.shift()
+              }
+            }
+            if (newTransactions.length > 0) {
+              setTransactions([...transactions, ...newTransactions])
+            }
+            setRefreshing(false)
+          }}
+          disabled={refreshing}
+        >
+          Refresh
+        </button>
         <div class='balance-wrapper'>
           <div class='label'>Balance</div>
           <div class='balance'>
@@ -88,47 +130,6 @@ export function App () {
       {cumTransactions.length > 0 && (
         <Graph data={cumTransactions} account={account} />
       )}
-      <button
-        onClick={async () => {
-          setRefreshing(true)
-          const lastDate =
-            transactions.length > 0
-              ? new Date(transactions[transactions.length - 1].time)
-              : undefined
-          const db = await TransactionDb.create()
-          const newTransactions: Transaction[] = []
-          for await (const transactions of syncChunks(
-            parseStream(scrape(lastDate))
-          )) {
-            await db.withTransaction(true, (store, request) => {
-              for (const transaction of transactions) {
-                newTransactions.push(transaction)
-                // Overwrite if already existing (put() instead of add())
-                request(store.put(transaction))
-              }
-            })
-          }
-          // `transactions` should be chronological, but `scrape` yields reverse
-          // chronological
-          newTransactions.reverse()
-          // Remove duplicate IDs
-          if (lastDate) {
-            while (
-              newTransactions.length > 0 &&
-              newTransactions[0].time <= lastDate.getTime()
-            ) {
-              newTransactions.shift()
-            }
-          }
-          if (newTransactions.length > 0) {
-            setTransactions([...transactions, ...newTransactions])
-          }
-          setRefreshing(false)
-        }}
-        disabled={refreshing}
-      >
-        Refresh
-      </button>
     </div>
   )
 }
