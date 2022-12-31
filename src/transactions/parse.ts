@@ -159,6 +159,9 @@ function parseTransaction ({
  *
  * The reason why this can't convert one transaction at a time is because it
  * needs to be able to create unique IDs for simultaneous transactions.
+ *
+ * TODO: Combine `parseStream` and `scrape` into a single function if they're
+ * always called together.
  */
 export async function * parseStream (
   iterable: AsyncIterable<RawTransaction | null>

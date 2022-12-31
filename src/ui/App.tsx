@@ -4,55 +4,80 @@
 /// <reference lib="deno.ns" />
 
 import { useState } from 'preact/hooks'
-import { CumTransaction, parseStream } from '../transactions/parse.ts'
+import {
+  CumTransaction,
+  parseStream,
+  Transaction
+} from '../transactions/parse.ts'
 import { scrape } from '../transactions/scrape.ts'
 import { TransactionDb } from '../transactions/store.ts'
+import { accumulate } from '../utils/cum.ts'
 import { syncChunks } from '../utils/iterables.ts'
 import { useAsyncEffect } from '../utils/use-async-effect.ts'
 import { Graph } from './components/Graph.tsx'
 
 export function App () {
-  const [data, setData] = useState<CumTransaction[] | null>(null)
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [refreshing, setRefreshing] = useState(false)
 
   useAsyncEffect(async () => {
     const db = await TransactionDb.create()
     const transactions = []
-    let accumulated = 0
     for await (const transaction of db.cursor()) {
-      if (
-        transaction.account === 'Dining Dollars' ||
-        transaction.account === 'Dining Dollars Rollover' ||
-        transaction.account === 'Triton2Go Dining Dollars'
-      ) {
-        // Keep it an integer by storing cents
-        accumulated += transaction.amount * 100
-        transactions.push({ ...transaction, balance: accumulated / 100 })
-      }
+      transactions.push(transaction)
     }
-    setData(transactions)
+    setTransactions(transactions)
   }, [])
+
+  const cumTransactions = accumulate(
+    transactions,
+    transaction =>
+      transaction.account === 'Dining Dollars' ||
+      transaction.account === 'Dining Dollars Rollover' ||
+      transaction.account === 'Triton2Go Dining Dollars'
+  )
 
   return (
     <div class='app'>
-      {data && data.length > 0 && <Graph data={data} />}
+      {cumTransactions.length > 0 && <Graph data={cumTransactions} />}
       <button
         onClick={async () => {
-          console.log('loading!')
-
+          setRefreshing(true)
+          const lastDate =
+            transactions.length > 0
+              ? new Date(transactions[transactions.length - 1].time)
+              : undefined
           const db = await TransactionDb.create()
-          for await (const transactions of syncChunks(parseStream(scrape()))) {
-            // for (const transaction of transactions) {
-            //   console.log(Object.values(transaction).join(' '))
-            // }
+          const newTransactions: Transaction[] = []
+          for await (const transactions of syncChunks(
+            parseStream(scrape(lastDate))
+          )) {
             await db.withTransaction(true, (store, request) => {
               for (const transaction of transactions) {
+                newTransactions.push(transaction)
                 // Overwrite if already existing (put() instead of add())
                 request(store.put(transaction))
               }
             })
           }
-          console.log('done!')
+          // `transactions` should be chronological, but `scrape` yields reverse
+          // chronological
+          newTransactions.reverse()
+          // Remove duplicate IDs
+          if (lastDate) {
+            while (
+              newTransactions.length > 0 &&
+              newTransactions[0].time <= lastDate.getTime()
+            ) {
+              newTransactions.shift()
+            }
+          }
+          if (newTransactions.length > 0) {
+            setTransactions([...transactions, ...newTransactions])
+          }
+          setRefreshing(false)
         }}
+        disabled={refreshing}
       >
         Refresh
       </button>

@@ -29,23 +29,24 @@ type TooltipProps = {
 function Tooltip ({ datum, xScale, yScale, width, height }: TooltipProps) {
   const x = xScale(datum.time)
   const y = yScale(datum.balance)
+  const anchoredLeft = x + TOOLTIP_WIDTH <= width - margin.right
+  const anchoredTop = y + TOOLTIP_HEIGHT <= height - margin.bottom
   return (
     <div
       class='tooltip'
       style={{
-        left: `${
-          x + TOOLTIP_WIDTH > width - margin.right ? x - TOOLTIP_WIDTH : x
-        }px`,
-        top: y + TOOLTIP_HEIGHT <= height - margin.bottom ? `${y}px` : null,
-        bottom:
-          y + TOOLTIP_HEIGHT > height - margin.bottom
-            ? `${height - y}px`
-            : null,
-        width: `${TOOLTIP_WIDTH}px`
+        left: `${anchoredLeft ? x : x - TOOLTIP_WIDTH}px`,
+        top: anchoredTop ? `${y}px` : null,
+        bottom: !anchoredTop ? `${height - y}px` : null,
+        width: `${TOOLTIP_WIDTH}px`,
+        [`border-${anchoredTop ? 'top' : 'bottom'}-${
+          anchoredLeft ? 'left' : 'right'
+        }-radius`]: '3px'
       }}
     >
       <h2 class='tooltip-amount'>{displayUsd(datum.amount, true)}</h2>
       <p class='tooltip-line'>On {new Date(datum.time).toLocaleString()}</p>
+      {/* TODO: Location display names */}
       <p class='tooltip-line'>At {datum.location}</p>
       <p class='tooltip-line'>Remaining: {displayUsd(datum.balance)}</p>
       <p class='tooltip-line'>{datum.account}</p>
@@ -57,11 +58,13 @@ type ActualGraphProps = {
   data: CumTransaction[]
   viewport: DOMRect
   includeZero?: boolean
+  includeNow?: boolean
 }
 function ActualGraph ({
   data,
   viewport: { width, height },
-  includeZero = false
+  includeZero = false,
+  includeNow = false
 }: ActualGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const xAxisRef = useRef<SVGGElement>(null)
@@ -72,7 +75,10 @@ function ActualGraph ({
     // https://observablehq.com/@d3/d3-scaletime
     const xScale = d3
       .scaleTime()
-      .domain([data[0].time, data[data.length - 1].time])
+      .domain([
+        data[0].time,
+        includeNow ? Date.now() : data[data.length - 1].time
+      ])
       .range([margin.left, width - margin.right])
     // .nice()
     const [min, max] = extrema(data.map(d => d.balance))
@@ -93,7 +99,7 @@ function ActualGraph ({
       .y1(d => yScale(d.balance))
       .curve(d3.curveStepAfter)
     return { xScale, yScale, line, area }
-  }, [data, width, height, includeZero])
+  }, [data, width, height, includeZero, includeNow])
 
   useEffect(() => {
     if (xAxisRef.current) {
@@ -141,7 +147,7 @@ function ActualGraph ({
         {hover && (
           <circle
             class='tooltip-dot'
-            r='2.5'
+            r='3'
             transform={`translate(${xScale(hover.time)}, ${yScale(
               hover.balance
             )})`}

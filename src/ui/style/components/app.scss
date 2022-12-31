@@ -42,6 +42,7 @@
     border: 1px solid rgba($color: black, $alpha: 0.5);
     box-sizing: border-box;
     pointer-events: none;
+    box-shadow: 0 3px 15px rgba($color: black, $alpha: 0.2);
   }
   .tooltip-amount {
     margin: 0;
