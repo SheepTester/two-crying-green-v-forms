@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import * as d3 from 'd3'
 import { CumTransaction } from '../../transactions/parse.ts'
 import { extrema } from '../../utils/extrema.ts'
+import { locations } from '../data/locations.ts'
 
 const margin = { top: 20, right: 20, bottom: 30, left: 40 }
 // https://observablehq.com/@d3/learn-d3-interaction
@@ -23,9 +24,23 @@ export function displayUsd (
   )
 }
 
-const TOOLTIP_WIDTH = 250
+function displayLocalTime (date: Date): string {
+  const local = new Date(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes()
+  )
+  return local.toLocaleString(undefined, {
+    dateStyle: 'full',
+    timeStyle: 'short' // No seconds
+  })
+}
+
+const TOOLTIP_WIDTH = 260
 /** Approximate height */
-const TOOLTIP_HEIGHT = 150
+const TOOLTIP_HEIGHT = 130
 type TooltipProps = {
   datum: CumTransaction
   xScale: d3.ScaleTime<number, number, never>
@@ -52,11 +67,11 @@ function Tooltip ({ datum, xScale, yScale, width, height }: TooltipProps) {
       }}
     >
       <h2 class='tooltip-amount'>{displayUsd(datum.amount, true)}</h2>
-      <p class='tooltip-line'>On {new Date(datum.time).toLocaleString()}</p>
-      {/* TODO: Location display names */}
-      <p class='tooltip-line'>At {datum.location}</p>
+      <p class='tooltip-line'>On {displayLocalTime(new Date(datum.time))}</p>
+      <p class='tooltip-line'>
+        From {locations[datum.location] || datum.location}
+      </p>
       <p class='tooltip-line'>Remaining: {displayUsd(datum.balance)}</p>
-      <p class='tooltip-line'>{datum.account}</p>
     </div>
   )
 }

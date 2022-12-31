@@ -34,9 +34,8 @@ async function main2 () {
 
 if (PATTERN.test(window.location.pathname)) {
   handleErrorPage()
-} else if (!document.getElementById('theform')) {
-  // #theform is the form used to redirect you to the sign-in page if you got
-  // signed out
+} else if (document.getElementById('masterHtmlElement')) {
+  // The normal web pages we're targetting has ID #masterHtmlElement on <html>
   handleNormalPage()
 }
 
