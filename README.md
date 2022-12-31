@@ -6,6 +6,12 @@ A browser extension to resurrect the legacy of [Triton
 Dine](https://tritondine.jacksheridan.com/), named after the [giraffe
 catchers](https://stuartcollection.ucsd.edu/artist/irwin.html).
 
+Currently, the extension can scrape your transaction history and display it as
+an interactive graph or export it as a CSV. In the future, I would like to add:
+
+- Predictions for when you'll run out of dining dollars
+- Recommended spending per day
+
 ## Development
 
 You'll need [Deno](https://deno.land/manual/getting_started/installation) and
