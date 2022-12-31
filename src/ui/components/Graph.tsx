@@ -12,8 +12,15 @@ const margin = { top: 20, right: 20, bottom: 30, left: 40 }
 // https://observablehq.com/@d3/learn-d3-interaction
 const bisect = d3.bisector<CumTransaction, number>(d => d.time).center
 
-export function displayUsd (amount: number, change = false): string {
-  return (amount < 0 ? '−$' : change ? '+$' : '$') + Math.abs(amount).toFixed(2)
+export function displayUsd (
+  amount: number,
+  change = false,
+  hyphen = false
+): string {
+  return (
+    (amount < 0 ? (hyphen ? '-$' : '−$') : change ? '+$' : '$') +
+    Math.abs(amount).toFixed(2)
+  )
 }
 
 const TOOLTIP_WIDTH = 250

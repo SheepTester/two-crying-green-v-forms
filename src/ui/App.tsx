@@ -6,6 +6,7 @@
 import { useState } from 'preact/hooks'
 import {
   CumTransaction,
+  displayTime,
   parseStream,
   Transaction
 } from '../transactions/parse.ts'
@@ -77,7 +78,7 @@ export function App () {
           </select>
         </div>
         <button
-          class='refresh-btn'
+          class='button refresh-btn'
           onClick={async () => {
             setRefreshing(true)
             const lastDate =
@@ -117,6 +118,41 @@ export function App () {
           disabled={refreshing}
         >
           Refresh
+        </button>
+        <button
+          class='button export-btn'
+          onClick={() => {
+            const blob = new Blob(
+              [
+                [
+                  ['Time,Balance,Amount,Location,Account'],
+                  ...cumTransactions.map(
+                    ({ account, amount, balance, location, time }) => [
+                      displayTime(new Date(time)),
+                      displayUsd(balance, false, true),
+                      displayUsd(amount, true, true),
+                      location,
+                      account
+                    ]
+                  )
+                ]
+                  .map(row => row.join(',') + '\n')
+                  .join('')
+              ],
+              { type: 'text/csv' }
+            )
+            const url = URL.createObjectURL(blob)
+            const link = Object.assign(document.createElement('a'), {
+              href: url,
+              download: `${account}.csv`
+            })
+            document.body.append(link)
+            link.click()
+            link.remove()
+            URL.revokeObjectURL(url)
+          }}
+        >
+          Export CSV
         </button>
         <div class='balance-wrapper'>
           <div class='label'>Balance</div>
