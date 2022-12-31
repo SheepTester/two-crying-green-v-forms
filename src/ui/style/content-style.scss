@@ -6,4 +6,10 @@
 .app {
   // Contain all of the style resets to within the app
   @include base.base;
+
+  // Fight the site's CSS
+  select {
+    border: none !important;
+    border-left: 5px solid var(--theme) !important;
+  }
 }

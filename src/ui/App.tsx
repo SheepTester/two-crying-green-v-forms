@@ -49,7 +49,7 @@ export function App () {
         <div class='wrapper'>
           <div class='label'>Account</div>
           <select
-            class={`account ${
+            class={`account-select ${
               account === 'dining-dollars' || account === 'triton-cash'
                 ? account
                 : ''
@@ -78,7 +78,7 @@ export function App () {
           </select>
         </div>
         <button
-          class='button refresh-btn'
+          class='action-btn refresh-btn'
           onClick={async () => {
             setRefreshing(true)
             const lastDate =
@@ -120,7 +120,7 @@ export function App () {
           Refresh
         </button>
         <button
-          class='button export-btn'
+          class='action-btn export-btn'
           onClick={() => {
             const blob = new Blob(
               [
