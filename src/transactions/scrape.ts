@@ -7,7 +7,7 @@ import { moment } from '../utils/delays.ts'
 import { event } from '../utils/event-listeners.ts'
 import { loadScript } from '../utils/extension/load-resource.ts'
 import { unwrap } from '../utils/unwrap.ts'
-import { RawTransaction } from './parse.ts'
+import { displayTime, RawTransaction } from './parse.ts'
 
 /**
  * Constants for various selectors used for scraping the transactions page.
@@ -220,8 +220,10 @@ export async function * scrape (
   )
 
   // Start the date range from 2000
-  // TODO: startDate
-  iframe.setValue('startDateInput', '2000-01-01 12:00 AM')
+  iframe.setValue(
+    'startDateInput',
+    startDate ? displayTime(startDate) : '2000-01-01 12:00 AM'
+  )
   if (endDate !== undefined) {
     iframe.setValue('endDateInput', endDate)
   }

@@ -85,7 +85,11 @@ export type Transaction = {
   location: string
 }
 
-export type AccumulatedTransaction = Transaction & {
+/**
+ * Cumulative transaction. `balance` accumulates `amount` and keeps track of the
+ * remaining balance over time. Also, funny
+ */
+export type CumTransaction = Transaction & {
   /**
    * The resulting amount of money in the account after the transaction.
    */
@@ -93,33 +97,40 @@ export type AccumulatedTransaction = Transaction & {
 }
 
 /**
- * Number of milliseconds in a minute.
- */
-const MS_PER_MIN = 60_000
-
-/**
  * Parses a date/time string of the form YYYY-MM-DD hh:MM A/PM and returns the
- * number of *minutes* since the Unix epoch in UTC.
+ * number of milliseconds since the Unix epoch in UTC.
  */
 function parseTime (dateTime: string): number {
   const [date, time, meridiem] = dateTime.split(' ')
   const [year, month, day] = date.split('-').map(Number)
   const [hour, minute] = time.split(':').map(Number)
-  return (
-    Date.UTC(
-      year,
-      month - 1,
-      day,
-      hour === 12
-        ? meridiem === 'AM'
-          ? 0
-          : 12
-        : meridiem === 'AM'
-        ? hour
-        : hour + 12,
-      minute
-    ) / MS_PER_MIN
+  return Date.UTC(
+    year,
+    month - 1,
+    day,
+    hour === 12
+      ? meridiem === 'AM'
+        ? 0
+        : 12
+      : meridiem === 'AM'
+      ? hour
+      : hour + 12,
+    minute
   )
+}
+
+/**
+ * Inverse of `parseTime`.
+ */
+export function displayTime (date: Date): string {
+  return [
+    date.toISOString().slice(0, 10),
+    [
+      ((date.getUTCHours() + 11) % 12) + 1,
+      date.getUTCMinutes().toString().padStart(2, '0')
+    ].join(':'),
+    date.getUTCHours() < 12 ? 'AM' : 'PM'
+  ].join(' ')
 }
 
 /**
@@ -135,7 +146,7 @@ function parseTransaction ({
 }: RawTransaction): Transaction {
   const time = parseTime(dateTime)
   return {
-    time: time * MS_PER_MIN,
+    time,
     account: accountName,
     // Remove thousands separator (otherwise "3,749.00 USD" gets parsed as 3)
     amount: parseFloat(amount.replaceAll(',', '')),

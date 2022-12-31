@@ -5,13 +5,13 @@
 
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import * as d3 from 'd3'
-import { AccumulatedTransaction } from '../../transactions/parse.ts'
+import { CumTransaction } from '../../transactions/parse.ts'
 import { extrema } from '../../utils/extrema.ts'
 
 const margin = { top: 20, right: 30, bottom: 30, left: 40 }
 
 type ActualGraphProps = {
-  data: AccumulatedTransaction[]
+  data: CumTransaction[]
   viewport: DOMRect
   includeZero?: boolean
 }
@@ -37,13 +37,13 @@ function ActualGraph ({
       .domain([includeZero ? 0 : min, max])
       .range([height - margin.bottom, margin.top])
     const line = d3
-      .line<AccumulatedTransaction>()
+      .line<CumTransaction>()
       .x(d => xScale(d.time))
       .y(d => yScale(d.balance))
       // https://github.com/d3/d3-shape/blob/main/README.md#curveStepAfter
       .curve(d3.curveStepAfter)
     const area = d3
-      .area<AccumulatedTransaction>()
+      .area<CumTransaction>()
       .x(d => xScale(d.time))
       .y0(height - margin.bottom)
       .y1(d => yScale(d.balance))
@@ -90,7 +90,7 @@ function ActualGraph ({
 }
 
 type GraphProps = {
-  data: AccumulatedTransaction[]
+  data: CumTransaction[]
 }
 export function Graph ({ data }: GraphProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)

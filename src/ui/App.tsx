@@ -4,7 +4,7 @@
 /// <reference lib="deno.ns" />
 
 import { useState } from 'preact/hooks'
-import { AccumulatedTransaction, parseStream } from '../transactions/parse.ts'
+import { CumTransaction, parseStream } from '../transactions/parse.ts'
 import { scrape } from '../transactions/scrape.ts'
 import { TransactionDb } from '../transactions/store.ts'
 import { syncChunks } from '../utils/iterables.ts'
@@ -12,7 +12,7 @@ import { useAsyncEffect } from '../utils/use-async-effect.ts'
 import { Graph } from './components/Graph.tsx'
 
 export function App () {
-  const [data, setData] = useState<AccumulatedTransaction[] | null>(null)
+  const [data, setData] = useState<CumTransaction[] | null>(null)
 
   useAsyncEffect(async () => {
     const db = await TransactionDb.create()
