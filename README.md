@@ -16,6 +16,11 @@ Currently, the extension can scrape your transaction history and display it as a
 - Predictions for when you'll run out of dining dollars
 - Recommended spending per day
 
+Potential data analysis dashboards: (can select between all days/weekend/weekdays and mean/median)
+
+- A graph of average spending per day of the week
+- Maybe the time of day when money is spent?
+
 ## Development
 
 You'll need [Deno][deno] and [Nodemon][nodemon] (for which you'll probably need [Node][node]).
