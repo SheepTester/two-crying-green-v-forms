@@ -18,8 +18,10 @@ Currently, the extension can scrape your transaction history and display it as a
 
 Potential data analysis dashboards: (can select between all days/weekend/weekdays and mean/median)
 
-- A graph of average spending per day of the week
-- Maybe the time of day when money is spent?
+- A graph of average spending per each day of the week
+- Number of transactions vs time of day
+- Most used locations (bar chart)
+- Average spending per day, week, quarter
 
 ## Development
 
