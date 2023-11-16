@@ -1,8 +1,8 @@
 <img src="./images/icon.svg" style="float: right; width: 32px;">
 
-# Two Crying Green V Forms
+# UCSD dining dollar tracker
 
-A browser extension to resurrect the legacy of [Triton Dine][triton-dine], named after the [giraffe catchers][giraffe-catchers].
+A browser extension to resurrect the legacy of [Triton Dine][triton-dine].
 
 [triton-dine]: https://tritondine.jacksheridan.com/
 [giraffe-catchers]: https://stuartcollection.ucsd.edu/artist/irwin.html

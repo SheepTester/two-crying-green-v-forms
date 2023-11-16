@@ -1,5 +1,5 @@
 {
-  "name": "Two Crying Green V Forms",
+  "name": "UCSD dining dollar tracker",
   "description": "Track and plan your UCSD dining dollar usage. Inspired by Triton Dine.",
   "version": "0.1.0",
   "manifest_version": 3,
@@ -31,7 +31,8 @@
   ],
   "permissions": ["contextMenus"],
   "background": {
-    "service_worker": "/dist/background.js"
+    "service_worker": "/dist/background.js",
+    "type": "module"
   },
   "action": {},
   "icons": {

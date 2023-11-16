@@ -1,22 +1,17 @@
-<svg
-  width="25"
-  height="25"
-  viewBox="0 0 25 25"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <!--
-    The icon is supposed to mimic both the Two Running Violet V Forms and the
-    downsloping curve of your remaining dining dollars.
-  -->
-  <path
-    d="M5 5L10 9L15 7L20 11V21L15 17L10 19L5 15V5Z"
-    fill="#00FF19"
-    fill-opacity="0.5"
-  />
-  <path
-    d="M5 25V5 M10 25V9 M15 25V7 M20 25V11 M5 5L10 9L15 7L20 11 M5 15L10 19L15 17L20 21 M5 10L10 14L15 12L20 16"
-    stroke="#DBDBDB"
-    stroke-linecap="round"
-  />
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_2359_2394)">
+<path d="M15 15L5 5V18L15 28V15Z" fill="#0094FF" fill-opacity="0.7" stroke="#ABABAB" stroke-width="2" stroke-linejoin="round"/>
+<path d="M35 20L25 10V23L35 33V20Z" fill="#0094FF" fill-opacity="0.7" stroke="#ABABAB" stroke-width="2" stroke-linejoin="round"/>
+<path d="M25 10L15 15V28L25 23V10Z" fill="#0094FF" fill-opacity="0.5" stroke="#ABABAB" stroke-width="2" stroke-linejoin="round"/>
+<path d="M35 40V20" stroke="#ABABAB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M25 30V10" stroke="#ABABAB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M15 35V15" stroke="#ABABAB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M5 25V5" stroke="#ABABAB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M35 20L33 13M35 20L28 18M35 20L25 10L15 15L5 5" stroke="#F53B3B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_2359_2394">
+<rect width="40" height="40" fill="white"/>
+</clipPath>
+</defs>
 </svg>
