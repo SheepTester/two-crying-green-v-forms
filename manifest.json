@@ -12,13 +12,13 @@
     {
       "matches": ["*://eacct-ucsd-sp.transactcampus.com/*"],
       "exclude_matches": [
-        "*://eacct-ucsd-sp.transactcampus.com/*/TwoCryingGreenVForms.aspx"
+        "*://eacct-ucsd-sp.transactcampus.com/*/DiningDollarAnalysis.aspx"
       ],
       "css": ["/dist/content-style.css"]
     },
     {
       "matches": [
-        "*://eacct-ucsd-sp.transactcampus.com/*/TwoCryingGreenVForms.aspx"
+        "*://eacct-ucsd-sp.transactcampus.com/*/DiningDollarAnalysis.aspx"
       ],
       "css": ["/dist/page.css"]
     }

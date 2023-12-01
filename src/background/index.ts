@@ -1,7 +1,7 @@
 import chrome from '../utils/extension/chrome.js'
 
 const EACCOUNTS_URL =
-  'https://eacct-ucsd-sp.transactcampus.com/eAccounts/TwoCryingGreenVForms.aspx'
+  'https://eacct-ucsd-sp.transactcampus.com/eAccounts/DiningDollarAnalysis.aspx'
 const GITHUB_URL = 'https://github.com/SheepTester/two-crying-green-v-forms'
 
 // Open the account transactions page on clicking the icon
