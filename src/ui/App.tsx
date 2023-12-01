@@ -4,12 +4,7 @@
 /// <reference lib="deno.ns" />
 
 import { useState } from 'preact/hooks'
-import {
-  CumTransaction,
-  displayTime,
-  parseStream,
-  Transaction
-} from '../transactions/parse.ts'
+import { displayTime, parseStream, Transaction } from '../transactions/parse.ts'
 import { scrape } from '../transactions/scrape.ts'
 import { TransactionDb } from '../transactions/store.ts'
 import { accumulate } from '../utils/cum.ts'
@@ -78,6 +73,7 @@ export function App () {
           </select>
         </div>
         <button
+          type='button'
           class='action-btn refresh-btn'
           onClick={async () => {
             setRefreshing(true)
@@ -120,6 +116,7 @@ export function App () {
           Refresh
         </button>
         <button
+          type='button'
           class='action-btn export-btn'
           onClick={() => {
             const blob = new Blob(
