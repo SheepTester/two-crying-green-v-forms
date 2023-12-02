@@ -71,6 +71,7 @@ function Tooltip ({ datum, xScale, yScale, width, height }: TooltipProps) {
       <p class='tooltip-line'>On {displayLocalTime(new Date(datum.time))}</p>
       <p class='tooltip-line'>
         From {locations[datum.location] || datum.location}
+        {datum.location.includes('Mobile') ? ' (mobile order)' : ''}
       </p>
       <p class='tooltip-line'>Remaining: {displayUsd(datum.balance)}</p>
     </div>
@@ -79,13 +80,11 @@ function Tooltip ({ datum, xScale, yScale, width, height }: TooltipProps) {
 
 type ActualGraphProps = {
   data: CumTransaction[]
-  account: string
   includeZero?: boolean
   includeNow?: boolean
 }
 function ActualGraph ({
   data,
-  account,
   viewport: { width, height },
   includeZero = false,
   includeNow = false
@@ -142,11 +141,7 @@ function ActualGraph ({
   return (
     <>
       <svg
-        class={`graph ${
-          account === 'dining-dollars' || account === 'triton-cash'
-            ? account
-            : ''
-        }`}
+        class='graph'
         viewBox={`0 0 ${width} ${height}`}
         ref={svgRef}
         onMouseMove={e => {
@@ -195,4 +190,4 @@ function ActualGraph ({
   )
 }
 
-export const Graph = withViewport('graph-wrapper', ActualGraph)
+export const Graph = withViewport(ActualGraph)

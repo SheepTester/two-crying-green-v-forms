@@ -7,16 +7,22 @@ import { useEffect, useMemo, useRef } from 'preact/hooks'
 import * as d3 from 'd3'
 import { withViewport } from './withViewport.tsx'
 
-const margin = { top: 20, right: 20, bottom: 30, left: 40 }
+const defaultMargin = { top: 20, right: 20, bottom: 30, left: 40 }
+type Margin = typeof defaultMargin
 
 export type BarChartProps = {
   data: [group: string, frequency: number][]
+  slanted?: boolean
+  margin?: Partial<Margin>
 }
-export const BarChart = withViewport<BarChartProps>('graph-wrapper', props => {
+export const BarChart = withViewport<BarChartProps>(props => {
   const {
     viewport: { width, height },
-    data
+    data,
+    slanted = false,
+    margin: customMargin
   } = props
+  const margin = { ...defaultMargin, ...customMargin }
   const svgRef = useRef<SVGSVGElement>(null)
   const xAxisRef = useRef<SVGGElement>(null)
   const yAxisRef = useRef<SVGGElement>(null)
@@ -49,20 +55,21 @@ export const BarChart = withViewport<BarChartProps>('graph-wrapper', props => {
 
   return (
     <>
-      <svg class={'bar-chart'} viewBox={`0 0 ${width} ${height}`} ref={svgRef}>
+      <svg class='graph' viewBox={`0 0 ${width} ${height}`} ref={svgRef}>
         <g
-          class='axis'
+          class={`axis ${slanted ? 'slanted' : ''}`}
           transform={`translate(0, ${height - margin.bottom})`}
           ref={xAxisRef}
         />
         <g
-          class='axis'
+          class='axis bar-chart-y-axis'
           transform={`translate(${margin.left}, 0)`}
           ref={yAxisRef}
         />
         {data.map(([group, frequency], i) => (
           <rect
             key={i}
+            class='bar'
             x={xScale(group)}
             y={yScale(frequency)}
             width={xScale.bandwidth()}

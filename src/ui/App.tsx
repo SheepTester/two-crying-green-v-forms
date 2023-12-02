@@ -43,6 +43,26 @@ export function App () {
       ),
     [transactions, account]
   )
+  const frequentDays = useMemo(
+    () =>
+      countFrequencies(
+        cumTransactions,
+        t => new Date(t.time).getDay(),
+        [0, 1, 2, 3, 4, 5, 6]
+      ).map(([day, freq]): [string, number] => [
+        [
+          'Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday'
+        ][day],
+        freq
+      ]),
+    [cumTransactions]
+  )
   const frequentLocations = useMemo(
     () =>
       countFrequencies(
@@ -51,18 +71,27 @@ export function App () {
       ),
     [cumTransactions]
   )
+  console.log([
+    ...new Set(cumTransactions.map(a => a.location).filter(a => !locations[a]))
+  ])
 
   return (
-    <div class='app'>
+    <div
+      class='app'
+      style={{
+        '--theme':
+          account === 'dining-dollars'
+            ? 'orange'
+            : account === 'triton-cash'
+            ? 'cyan'
+            : ''
+      }}
+    >
       <div class='above-graph'>
         <div class='wrapper'>
           <div class='label'>Account</div>
           <select
-            class={`account-select ${
-              account === 'dining-dollars' || account === 'triton-cash'
-                ? account
-                : ''
-            }`}
+            class='account-select'
             value={account}
             onChange={e => {
               setAccount(e.currentTarget.value)
@@ -176,8 +205,22 @@ export function App () {
       </div>
       {cumTransactions.length > 0 && (
         <>
-          <Graph data={cumTransactions} account={account} />
-          <BarChart data={frequentLocations} />
+          <Graph wrapperClass='graph-wrapper' data={cumTransactions} />
+          <div class='charts'>
+            <div class='chart'>
+              <h2>Frequent days</h2>
+              <BarChart wrapperClass='graph-wrapper' data={frequentDays} />
+            </div>
+            <div class='chart'>
+              <h2>Frequent locations</h2>
+              <BarChart
+                wrapperClass='graph-wrapper'
+                data={frequentLocations}
+                margin={{ bottom: 120 }}
+                slanted
+              />
+            </div>
+          </div>
         </>
       )}
     </div>

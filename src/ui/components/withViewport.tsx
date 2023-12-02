@@ -7,10 +7,9 @@ import { ComponentType } from 'preact'
 import { useEffect, useRef, useState } from 'preact/hooks'
 
 export function withViewport<T> (
-  wrapperClass: string,
   Component: ComponentType<T & { viewport: DOMRect }>
 ) {
-  return (props: T) => {
+  return (props: T & { wrapperClass?: string }) => {
     const wrapperRef = useRef<HTMLDivElement>(null)
     const [viewport, setViewPort] = useState<DOMRect | null>(null)
 
@@ -30,7 +29,7 @@ export function withViewport<T> (
     }, [wrapperRef.current])
 
     return (
-      <div class={wrapperClass} ref={wrapperRef}>
+      <div class={props.wrapperClass} ref={wrapperRef}>
         {viewport && <Component {...props} viewport={viewport} />}
       </div>
     )

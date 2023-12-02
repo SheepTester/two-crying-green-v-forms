@@ -4,6 +4,7 @@
 // eAccounts styles
 .app {
   padding: 20px;
+  --theme: white;
 
   .above-graph {
     display: flex;
@@ -22,7 +23,6 @@
     font-weight: bold;
   }
   .account-select {
-    --theme: white;
     border-left: 5px solid var(--theme);
     padding: 0 15px;
     height: 48px;
@@ -96,13 +96,9 @@
     top: 0;
     left: 0;
     fill: none;
-    --theme: white;
   }
-  .dining-dollars {
-    --theme: orange;
-  }
-  .triton-cash {
-    --theme: cyan;
+  .bar {
+    fill: var(--theme);
   }
   .axis-line {
     stroke: rgba($color: white, $alpha: 0.3);
@@ -119,6 +115,13 @@
   }
   .axis {
     color: rgba($color: white, $alpha: 0.7);
+  }
+  .slanted text {
+    text-anchor: end;
+    transform: rotate(-65deg);
+  }
+  .bar-chart-y-axis .domain {
+    display: none;
   }
   .tooltip-dot {
     fill: white;
