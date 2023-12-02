@@ -3,7 +3,7 @@
 /// <reference lib="dom" />
 /// <reference lib="deno.ns" />
 
-import { useState } from 'preact/hooks'
+import { useMemo, useState } from 'preact/hooks'
 import { displayTime, parseStream, Transaction } from '../transactions/parse.ts'
 import { scrape } from '../transactions/scrape.ts'
 import { TransactionDb } from '../transactions/store.ts'
@@ -11,6 +11,8 @@ import { accumulate } from '../utils/cum.ts'
 import { syncChunks } from '../utils/iterables.ts'
 import { useAsyncEffect } from '../utils/use-async-effect.ts'
 import { displayUsd, Graph } from './components/Graph.tsx'
+import { BarChart, countFrequencies } from './components/BarChart.tsx'
+import { locations } from './data/locations.ts'
 
 export function App () {
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -26,16 +28,28 @@ export function App () {
     setTransactions(transactions)
   }, [])
 
-  const cumTransactions = accumulate(
-    transactions,
-    account === 'dining-dollars'
-      ? transaction =>
-          transaction.account === 'Dining Dollars' ||
-          transaction.account === 'Dining Dollars Rollover' ||
-          transaction.account === 'Triton2Go Dining Dollars'
-      : account === 'triton-cash'
-      ? transaction => transaction.account === 'Triton Cash'
-      : transaction => transaction.account === account
+  const cumTransactions = useMemo(
+    () =>
+      accumulate(
+        transactions,
+        account === 'dining-dollars'
+          ? transaction =>
+              transaction.account === 'Dining Dollars' ||
+              transaction.account === 'Dining Dollars Rollover' ||
+              transaction.account === 'Triton2Go Dining Dollars'
+          : account === 'triton-cash'
+          ? transaction => transaction.account === 'Triton Cash'
+          : transaction => transaction.account === account
+      ),
+    [transactions, account]
+  )
+  const frequentLocations = useMemo(
+    () =>
+      countFrequencies(
+        cumTransactions,
+        t => locations[t.location] || t.location
+      ),
+    [cumTransactions]
   )
 
   return (
@@ -161,7 +175,10 @@ export function App () {
         </div>
       </div>
       {cumTransactions.length > 0 && (
-        <Graph data={cumTransactions} account={account} />
+        <>
+          <Graph data={cumTransactions} account={account} />
+          <BarChart data={frequentLocations} />
+        </>
       )}
     </div>
   )

@@ -4,6 +4,9 @@
 @use './components/navbar.scss';
 @use './base.scss' as base;
 
+:root {
+  color-scheme: dark;
+}
 body {
   @include base.base;
 
