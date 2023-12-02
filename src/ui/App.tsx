@@ -12,7 +12,7 @@ import { syncChunks } from '../utils/iterables.ts'
 import { useAsyncEffect } from '../utils/use-async-effect.ts'
 import { displayUsd, Graph } from './components/Graph.tsx'
 import { BarChart, countFrequencies } from './components/BarChart.tsx'
-import { locations } from './data/locations.ts'
+import { displayLocation } from './data/locations.ts'
 import { Histogram } from './components/Histogram.tsx'
 
 export function App () {
@@ -68,16 +68,12 @@ export function App () {
     () =>
       cumTransactions.map(t => {
         const date = new Date(t.time)
-        return date.getUTCHours() * 60 + date.getUTCMinutes()
+        return (date.getUTCHours() * 60 + date.getUTCMinutes())
       }),
     [cumTransactions]
   )
   const frequentLocations = useMemo(
-    () =>
-      countFrequencies(
-        cumTransactions,
-        t => locations[t.location] || t.location
-      ),
+    () => countFrequencies(cumTransactions, t => displayLocation(t.location)),
     [cumTransactions]
   )
   const amounts = useMemo(
@@ -96,9 +92,9 @@ export function App () {
       style={{
         '--theme':
           account === 'dining-dollars'
-            ? 'orange'
+            ? '#FFCD00'
             : account === 'triton-cash'
-            ? 'cyan'
+            ? '#00C6D7'
             : ''
       }}
     >
@@ -228,7 +224,7 @@ export function App () {
             </div>
             <div class='chart'>
               <h2>Frequent times</h2>
-              <Histogram wrapperClass='graph-wrapper' data={times} />
+              <Histogram wrapperClass='graph-wrapper' data={times} time />
             </div>
             <div class='chart'>
               <h2>Frequent locations</h2>

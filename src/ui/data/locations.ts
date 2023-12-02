@@ -1,4 +1,4 @@
-export const locations: Record<string, string> = {
+const locations: Record<string, string> = {
   'Blue Pepper Asian Blue Pepper Asian': 'Blue Pepper',
   'HDH 64 Degrees 64-Burger Lounge Mobile Order': '64° Triton Grill',
   'HDH 64 Degrees 64-Global Bowls 1': '64° Wok',
@@ -78,5 +78,14 @@ export const locations: Record<string, string> = {
   'HDH Cafe Ventanas Cafe Ventana  Tandoor Mobile': 'Cafe V Tandoor',
   'HDH 64 Degrees 64-Umi 1': 'Umi',
   'HDH 64 Degrees 64-Umi Mobile Ordering': 'Umi',
-  'HDH Cafe Ventanas Cafe Ventana Vibe Mobile': 'Cafe V Vibe'
+  'HDH Cafe Ventanas Cafe Ventana Vibe Mobile': 'Cafe V Vibe',
+  'Sweetfin UTC Sweetfin UTC': 'Sweetfin',
+  'Curry Up Now Curry Up Now': 'Curry Up Now'
+}
+
+export function displayLocation (location: string): string {
+  if (location.startsWith('Imprints Geisel Imprints WEPA')) {
+    return 'Wēpa printing'
+  }
+  return locations[location] ?? location
 }

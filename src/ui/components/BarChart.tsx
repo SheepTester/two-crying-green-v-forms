@@ -45,7 +45,7 @@ export const BarChart = withViewport<BarChartProps>(props => {
     if (xAxisRef.current) {
       d3.select(xAxisRef.current).call(d3.axisBottom(xScale).tickSizeOuter(0))
     }
-  }, [xScale, xAxisRef.current, width])
+  }, [xScale, xAxisRef.current])
 
   useEffect(() => {
     if (yAxisRef.current) {
@@ -76,7 +76,7 @@ export const BarChart = withViewport<BarChartProps>(props => {
             height={yScale(0) - yScale(frequency)}
           >
             <title>
-              {group}: {frequency}
+              {group} ({frequency})
             </title>
           </rect>
         ))}

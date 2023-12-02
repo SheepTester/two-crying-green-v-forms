@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import * as d3 from 'd3'
 import { CumTransaction } from '../../transactions/parse.ts'
 import { extrema } from '../../utils/extrema.ts'
-import { locations } from '../data/locations.ts'
+import { displayLocation } from '../data/locations.ts'
 import { withViewport } from './withViewport.tsx'
 
 const margin = { top: 20, right: 20, bottom: 30, left: 40 }
@@ -70,7 +70,7 @@ function Tooltip ({ datum, xScale, yScale, width, height }: TooltipProps) {
       <h2 class='tooltip-amount'>{displayUsd(datum.amount, true)}</h2>
       <p class='tooltip-line'>On {displayLocalTime(new Date(datum.time))}</p>
       <p class='tooltip-line'>
-        From {locations[datum.location] || datum.location}
+        From {displayLocation(datum.location)}
         {datum.location.includes('Mobile') ? ' (mobile order)' : ''}
       </p>
       <p class='tooltip-line'>Remaining: {displayUsd(datum.balance)}</p>
