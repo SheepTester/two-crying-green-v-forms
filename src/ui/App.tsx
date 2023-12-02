@@ -19,6 +19,7 @@ export function App () {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [refreshing, setRefreshing] = useState(false)
   const [account, setAccount] = useState('dining-dollars')
+  const [deadline, setDeadline] = useState('')
 
   useAsyncEffect(async () => {
     const db = await TransactionDb.create()
@@ -85,6 +86,19 @@ export function App () {
         .map(t => t.amount),
     [cumTransactions]
   )
+
+  const total = cumTransactions[cumTransactions.length - 1]?.balance ?? 0
+  const dailySpend = useMemo(() => {
+    const today = new Date()
+    const days =
+      (+new Date(deadline) -
+        Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())) /
+      1000 /
+      60 /
+      60 /
+      24
+    return total / days
+  }, [deadline, cumTransactions])
 
   return (
     <div
@@ -207,11 +221,7 @@ export function App () {
         </button>
         <div class='balance-wrapper'>
           <div class='label'>Balance</div>
-          <div class='balance'>
-            {displayUsd(
-              cumTransactions[cumTransactions.length - 1]?.balance ?? 0
-            )}
-          </div>
+          <div class='balance'>{displayUsd(total)}</div>
         </div>
       </div>
       {cumTransactions.length > 0 && (
@@ -220,6 +230,22 @@ export function App () {
           <div class='analysis'>
             <div style={{ gridArea: 'spend-calc' }}>
               <h2>Spending calculator</h2>
+              <p>
+                <label>
+                  Use by:{' '}
+                  <input
+                    type='date'
+                    value={deadline}
+                    onInput={e => setDeadline(e.currentTarget.value)}
+                  />
+                </label>
+              </p>
+              {Number.isFinite(dailySpend) && (
+                <p>
+                  You must spend <strong>{displayUsd(dailySpend)}</strong> per
+                  day.
+                </p>
+              )}
             </div>
             <div style={{ gridArea: 'spending' }}>
               <h2>Spending</h2>
