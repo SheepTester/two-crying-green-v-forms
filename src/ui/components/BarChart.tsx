@@ -38,6 +38,7 @@ export const BarChart = withViewport<BarChartProps>(props => {
       .scaleLinear()
       .domain([0, d3.max(data, ([, frequency]) => frequency) ?? 0])
       .range([height - margin.bottom, margin.top])
+      .nice()
     return { xScale, yScale }
   }, [data, width, height])
 

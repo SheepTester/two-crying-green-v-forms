@@ -68,7 +68,7 @@ export function App () {
     () =>
       cumTransactions.map(t => {
         const date = new Date(t.time)
-        return (date.getUTCHours() * 60 + date.getUTCMinutes())
+        return date.getUTCHours() * 60 + date.getUTCMinutes()
       }),
     [cumTransactions]
   )
@@ -217,27 +217,30 @@ export function App () {
       {cumTransactions.length > 0 && (
         <>
           <Graph wrapperClass='graph-wrapper' data={cumTransactions} />
-          <div class='charts'>
-            <div class='chart'>
+          <div class='analysis'>
+            <div style={{ gridArea: 'spend-calc' }}>
+              <h2>Spending calculator</h2>
+            </div>
+            <div style={{ gridArea: 'spending' }}>
+              <h2>Spending</h2>
+              <Histogram wrapperClass='chart-wrapper' data={amounts} />
+            </div>
+            <div style={{ gridArea: 'days' }}>
               <h2>Frequent days</h2>
-              <BarChart wrapperClass='graph-wrapper' data={frequentDays} />
+              <BarChart wrapperClass='chart-wrapper' data={frequentDays} />
             </div>
-            <div class='chart'>
+            <div style={{ gridArea: 'times' }}>
               <h2>Frequent times</h2>
-              <Histogram wrapperClass='graph-wrapper' data={times} time />
+              <Histogram wrapperClass='chart-wrapper' data={times} time />
             </div>
-            <div class='chart'>
+            <div style={{ gridArea: 'locations' }}>
               <h2>Frequent locations</h2>
               <BarChart
-                wrapperClass='graph-wrapper'
+                wrapperClass='chart-wrapper'
                 data={frequentLocations}
-                margin={{ bottom: 120 }}
+                margin={{ bottom: 150 }}
                 slanted
               />
-            </div>
-            <div class='chart'>
-              <h2>Spending</h2>
-              <Histogram wrapperClass='graph-wrapper' data={amounts} />
             </div>
           </div>
         </>

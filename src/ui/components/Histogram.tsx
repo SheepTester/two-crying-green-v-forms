@@ -48,6 +48,7 @@ export const Histogram = withViewport<HistogramProps>(props => {
       .scaleLinear()
       .domain([0, d3.max(bins, d => d.length) ?? 0])
       .range([height - margin.bottom, margin.top])
+      .nice()
     return { bins, xScale, yScale }
   }, [data, width, height])
 
