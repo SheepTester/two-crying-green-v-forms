@@ -10,16 +10,14 @@ import { withViewport } from './withViewport.tsx'
 const defaultMargin = { top: 20, right: 20, bottom: 30, left: 40 }
 type Margin = typeof defaultMargin
 
-export type BarChartProps = {
-  data: [group: string, frequency: number][]
-  slanted?: boolean
+export type HistogramProps = {
+  data: number[]
   margin?: Partial<Margin>
 }
-export const BarChart = withViewport<BarChartProps>(props => {
+export const Histogram = withViewport<HistogramProps>(props => {
   const {
     viewport: { width, height },
     data,
-    slanted = false,
     margin: customMargin
   } = props
   const margin = { ...defaultMargin, ...customMargin }
@@ -27,18 +25,18 @@ export const BarChart = withViewport<BarChartProps>(props => {
   const xAxisRef = useRef<SVGGElement>(null)
   const yAxisRef = useRef<SVGGElement>(null)
 
-  const { xScale, yScale } = useMemo(() => {
-    // https://observablehq.com/@d3/bar-chart/2
+  const { bins, xScale, yScale } = useMemo(() => {
+    // https://observablehq.com/@d3/histogram/2
+    const bins = d3.bin().thresholds(40)(data)
     const xScale = d3
-      .scaleBand()
-      .domain(data.map(([group]) => group))
+      .scaleLinear()
+      .domain([bins[0].x0 ?? 0, bins[bins.length - 1].x1 ?? 0])
       .range([margin.left, width - margin.right])
-      .padding(0.1)
     const yScale = d3
       .scaleLinear()
-      .domain([0, d3.max(data, ([, frequency]) => frequency) ?? 0])
+      .domain([0, d3.max(bins, d => d.length) ?? 0])
       .range([height - margin.bottom, margin.top])
-    return { xScale, yScale }
+    return { bins, xScale, yScale }
   }, [data, width, height])
 
   useEffect(() => {
@@ -57,7 +55,7 @@ export const BarChart = withViewport<BarChartProps>(props => {
     <>
       <svg class='graph' viewBox={`0 0 ${width} ${height}`} ref={svgRef}>
         <g
-          class={`axis ${slanted ? 'slanted' : ''}`}
+          class='axis'
           transform={`translate(0, ${height - margin.bottom})`}
           ref={xAxisRef}
         />
@@ -66,17 +64,17 @@ export const BarChart = withViewport<BarChartProps>(props => {
           transform={`translate(${margin.left}, 0)`}
           ref={yAxisRef}
         />
-        {data.map(([group, frequency], i) => (
+        {bins.map((d, i) => (
           <rect
             key={i}
             class='bar'
-            x={xScale(group)}
-            y={yScale(frequency)}
-            width={xScale.bandwidth()}
-            height={yScale(0) - yScale(frequency)}
+            x={xScale(d.x0 ?? 0)}
+            width={xScale(d.x1 ?? 0) - xScale(d.x0 ?? 0) - 1}
+            y={yScale(d.length)}
+            height={yScale(0) - yScale(d.length)}
           >
             <title>
-              {group}: {frequency}
+              {d.x0} – {d.x1}
             </title>
           </rect>
         ))}
@@ -84,26 +82,3 @@ export const BarChart = withViewport<BarChartProps>(props => {
     </>
   )
 })
-
-export function countFrequencies<T, K> (
-  data: T[],
-  getKey: (datum: T) => K,
-  keys?: K[]
-): [K, number][] {
-  const frequencies = new Map<K, number>()
-  if (keys) {
-    for (const key of keys) {
-      frequencies.set(key, 0)
-    }
-  }
-  for (const datum of data) {
-    const key = getKey(datum)
-    frequencies.set(key, (frequencies.get(key) ?? 0) + 1)
-  }
-  const arr = Array.from(frequencies.entries())
-  if (!keys) {
-    // Sort by frequency
-    arr.sort((a, b) => b[1] - a[1])
-  }
-  return arr
-}

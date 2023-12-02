@@ -46,7 +46,8 @@ export type RawTransaction = {
 
 export type Transaction = {
   /**
-   * When the transaction was made.
+   * When the transaction was made. The time representation is stored in UTC,
+   * even if the time zone may not be in UTC.
    *
    * This also serves as a unique ID. The number of the transaction if there
    * were multiple transactions at the same time is added to the transaction

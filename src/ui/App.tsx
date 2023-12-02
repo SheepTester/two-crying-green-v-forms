@@ -13,6 +13,7 @@ import { useAsyncEffect } from '../utils/use-async-effect.ts'
 import { displayUsd, Graph } from './components/Graph.tsx'
 import { BarChart, countFrequencies } from './components/BarChart.tsx'
 import { locations } from './data/locations.ts'
+import { Histogram } from './components/Histogram.tsx'
 
 export function App () {
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -47,7 +48,7 @@ export function App () {
     () =>
       countFrequencies(
         cumTransactions,
-        t => new Date(t.time).getDay(),
+        t => new Date(t.time).getUTCDay(),
         [0, 1, 2, 3, 4, 5, 6]
       ).map(([day, freq]): [string, number] => [
         [
@@ -63,6 +64,14 @@ export function App () {
       ]),
     [cumTransactions]
   )
+  const times = useMemo(
+    () =>
+      cumTransactions.map(t => {
+        const date = new Date(t.time)
+        return date.getUTCHours() * 60 + date.getUTCMinutes()
+      }),
+    [cumTransactions]
+  )
   const frequentLocations = useMemo(
     () =>
       countFrequencies(
@@ -71,9 +80,15 @@ export function App () {
       ),
     [cumTransactions]
   )
-  console.log([
-    ...new Set(cumTransactions.map(a => a.location).filter(a => !locations[a]))
-  ])
+  const amounts = useMemo(
+    () =>
+      cumTransactions
+        .filter(
+          t => t.location !== 'Triton Card Accounts Services HDH-R-APP-AD'
+        )
+        .map(t => t.amount),
+    [cumTransactions]
+  )
 
   return (
     <div
@@ -212,6 +227,10 @@ export function App () {
               <BarChart wrapperClass='graph-wrapper' data={frequentDays} />
             </div>
             <div class='chart'>
+              <h2>Frequent times</h2>
+              <Histogram wrapperClass='graph-wrapper' data={times} />
+            </div>
+            <div class='chart'>
               <h2>Frequent locations</h2>
               <BarChart
                 wrapperClass='graph-wrapper'
@@ -219,6 +238,10 @@ export function App () {
                 margin={{ bottom: 120 }}
                 slanted
               />
+            </div>
+            <div class='chart'>
+              <h2>Spending</h2>
+              <Histogram wrapperClass='graph-wrapper' data={amounts} />
             </div>
           </div>
         </>
