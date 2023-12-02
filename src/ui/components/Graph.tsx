@@ -78,17 +78,18 @@ function Tooltip ({ datum, xScale, yScale, width, height }: TooltipProps) {
   )
 }
 
-type ActualGraphProps = {
+type GraphProps = {
   data: CumTransaction[]
   includeZero?: boolean
   includeNow?: boolean
 }
-function ActualGraph ({
-  data,
-  viewport: { width, height },
-  includeZero = false,
-  includeNow = false
-}: ActualGraphProps & { viewport: DOMRect }) {
+export const Graph = withViewport<GraphProps>(props => {
+  const {
+    viewport: { width, height },
+    data,
+    includeZero = false,
+    includeNow = false
+  } = props
   const svgRef = useRef<SVGSVGElement>(null)
   const xAxisRef = useRef<SVGGElement>(null)
   const yAxisRef = useRef<SVGGElement>(null)
@@ -99,12 +100,13 @@ function ActualGraph ({
     const xScale = d3
       .scaleTime()
       .domain([
-        data[0].time,
-        includeNow ? Date.now() : data[data.length - 1].time
+        data[0]?.time ?? Date.now(),
+        includeNow ? Date.now() : data[data.length - 1]?.time ?? Date.now()
       ])
       .range([margin.left, width - margin.right])
     // .nice()
-    const [min, max] = extrema(data.map(d => d.balance))
+    const [min, max] =
+      data.length > 0 ? extrema(data.map(d => d.balance)) : [0, 0]
     const yScale = d3
       .scaleLinear()
       .domain([includeZero ? 0 : min, max])
@@ -188,6 +190,4 @@ function ActualGraph ({
       )}
     </>
   )
-}
-
-export const Graph = withViewport(ActualGraph)
+})

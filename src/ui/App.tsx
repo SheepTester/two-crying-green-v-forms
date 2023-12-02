@@ -221,56 +221,57 @@ export function App () {
         </button>
         <div class='balance-wrapper'>
           <div class='label'>Balance</div>
-          <div class='balance'>{displayUsd(total)}</div>
+          <div class='balance'>
+            {cumTransactions.length > 0 ? displayUsd(total) : '--'}
+          </div>
         </div>
       </div>
-      {cumTransactions.length > 0 && (
-        <>
-          <Graph wrapperClass='graph-wrapper' data={cumTransactions} />
-          <div class='analysis'>
-            <div style={{ gridArea: 'spend-calc' }}>
-              <h2>Spending calculator</h2>
-              <p>
-                <label>
-                  Use by:{' '}
-                  <input
-                    type='date'
-                    value={deadline}
-                    onInput={e => setDeadline(e.currentTarget.value)}
-                  />
-                </label>
-              </p>
-              {Number.isFinite(dailySpend) && (
-                <p>
-                  You must spend <strong>{displayUsd(dailySpend)}</strong> per
-                  day.
-                </p>
-              )}
-            </div>
-            <div style={{ gridArea: 'spending' }}>
-              <h2>Spending</h2>
-              <Histogram wrapperClass='chart-wrapper' data={amounts} />
-            </div>
-            <div style={{ gridArea: 'days' }}>
-              <h2>Frequent days</h2>
-              <BarChart wrapperClass='chart-wrapper' data={frequentDays} />
-            </div>
-            <div style={{ gridArea: 'times' }}>
-              <h2>Frequent times</h2>
-              <Histogram wrapperClass='chart-wrapper' data={times} time />
-            </div>
-            <div style={{ gridArea: 'locations' }}>
-              <h2>Frequent locations</h2>
-              <BarChart
-                wrapperClass='chart-wrapper'
-                data={frequentLocations}
-                margin={{ bottom: 150 }}
-                slanted
+      <Graph wrapperClass='graph-wrapper' data={cumTransactions} />
+      <div class='analysis'>
+        <div style={{ gridArea: 'spend-calc' }}>
+          <h2>Spending calculator</h2>
+          <p>
+            <label>
+              Use by:{' '}
+              <input
+                type='date'
+                value={deadline}
+                onInput={e => setDeadline(e.currentTarget.value)}
               />
-            </div>
-          </div>
-        </>
-      )}
+            </label>
+          </p>
+          {Number.isFinite(dailySpend) && (
+            <p>
+              You must spend <strong>{displayUsd(dailySpend)}</strong> per day.
+            </p>
+          )}
+        </div>
+        <div style={{ gridArea: 'spending' }}>
+          <h2>Spending</h2>
+          <Histogram
+            wrapperClass='chart-wrapper'
+            data={amounts}
+            format='money'
+          />
+        </div>
+        <div style={{ gridArea: 'days' }}>
+          <h2>Frequent days</h2>
+          <BarChart wrapperClass='chart-wrapper' data={frequentDays} />
+        </div>
+        <div style={{ gridArea: 'times' }}>
+          <h2>Frequent times</h2>
+          <Histogram wrapperClass='chart-wrapper' data={times} format='time' />
+        </div>
+        <div style={{ gridArea: 'locations' }}>
+          <h2>Frequent locations</h2>
+          <BarChart
+            wrapperClass='chart-wrapper'
+            data={frequentLocations}
+            margin={{ bottom: 150 }}
+            slanted
+          />
+        </div>
+      </div>
     </div>
   )
 }

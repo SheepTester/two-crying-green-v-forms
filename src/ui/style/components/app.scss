@@ -132,6 +132,7 @@
     padding: 10px;
     border-radius: 10px;
     background-color: rgba($color: black, $alpha: 0.3);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba($color: black, $alpha: 0.5);
     box-sizing: border-box;
     pointer-events: none;
@@ -152,6 +153,7 @@
       'spend-calc spending spending'
       'times times days'
       'locations locations locations';
+    grid-template-columns: 300px 1fr 1fr;
     @media (max-width: 1200px) {
       display: flex;
       flex-direction: column;
