@@ -19,6 +19,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v1.x
+      - uses: dw-labs-org/dart-sass-gha@d5c4c43545a79eaaa11cb4ec8363462702346184
       - run: make
       - name: zip
         run: |
