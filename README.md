@@ -9,7 +9,7 @@ A browser extension to resurrect the legacy of [Triton Dine][triton-dine].
 
 ![Screenshot of the extension's Dining Dollar analysis page][graph]
 
-[graph]: ./docs/images/scrape-graph.png
+[graph]: ./docs/images/analysis-page.png
 
 Currently, the extension can scrape your transaction history and display it as an interactive graph or export it as a CSV. In the future, I would like to add:
 
