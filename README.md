@@ -23,6 +23,18 @@ Potential data analysis dashboards: (can select between all days/weekend/weekday
 - Most used locations (bar chart)
 - Average spending per day, week, quarter
 
+# Installation
+
+I never bothered to publish the extension to the Chrome Web Store, so you'll have to install the extension manually.
+
+To install the extension,
+
+1. Download chromium-mv3.zip from the [Releases page](https://github.com/SheepTester/two-crying-green-v-forms/releases) and unzip it
+2. Go to `chrome://extensions/` and enable Developer Mode
+3. Click on "Load unpacked" and select the unzipped folder
+
+To confirm that it works, click on the extension icon or visit [Dining Dollar Analysis](https://eacct-ucsd-sp.transactcampus.com/eAccounts/DiningDollarAnalysis.aspx). It should show a custom page that normally wouldn't exist without the extension. Click on the "Refresh" icon and wait a few minutes for it to scrape your transaction history.
+
 ## Development
 
 You'll need [Deno][deno] and [Nodemon][nodemon] (for which you'll probably need [Node][node]).

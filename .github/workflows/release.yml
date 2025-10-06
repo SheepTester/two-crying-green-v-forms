@@ -1,0 +1,32 @@
+name: Build and release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v1.x
+      - uses: dw-labs-org/dart-sass-gha@d5c4c43545a79eaaa11cb4ec8363462702346184
+      - run: make
+      - name: zip
+        run: |
+          zip -r chromium-mv3.zip dist/ images/ manifest.json LICENSE
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: new release yay
+          files: chromium-mv3.zip
+          tag_name: ${{ inputs.tag_name }}
